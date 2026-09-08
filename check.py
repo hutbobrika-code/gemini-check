@@ -507,13 +507,39 @@ def send_telegram(text, chat_ids=None, reply_to=None):
     for chunk_start in range(0, len(text), 3800):
         chunk = text[chunk_start:chunk_start + 3800]
         for chat in chats:
+            answer_to = reply_to if chunk_start == 0 else None
             try:
                 tg_api("sendMessage", chat_id=chat, text=chunk,
                        parse_mode="HTML", disable_web_page_preview="true",
-                       reply_to_message_id=reply_to if chunk_start == 0 else None)
+                       reply_to_message_id=answer_to)
                 log(f"отчёт отправлен в чат {chat}")
+                continue
             except Exception as exc:  # noqa: BLE001
-                log(f"не удалось отправить в чат {chat}: {exc}")
+                detail = tg_error(exc)
+                log(f"не удалось отправить в чат {chat}: {detail}")
+
+            # Ответ на сообщение отваливается, если его успели удалить или оно
+            # из другой ветки. Сам отчёт при этом нужен — шлём его без ответа.
+            if not answer_to:
+                continue
+            try:
+                tg_api("sendMessage", chat_id=chat, text=chunk,
+                       parse_mode="HTML", disable_web_page_preview="true")
+                log(f"отчёт отправлен в чат {chat} (без ответа на сообщение)")
+            except Exception as exc:  # noqa: BLE001
+                log(f"повтор без ответа тоже не прошёл: {tg_error(exc)}")
+
+
+def tg_error(exc):
+    """У HTTPError полезное лежит в теле ответа, а не в тексте исключения."""
+    body = ""
+    if hasattr(exc, "read"):
+        try:
+            body = exc.read().decode("utf-8", "replace")[:300]
+        except Exception:  # noqa: BLE001
+            body = ""
+    m = re.search(r'"description"\s*:\s*"([^"]+)"', body)
+    return m.group(1) if m else f"{exc} {body}".strip()
 
 
 # ─────────────────────────── состояние ───────────────────────────
