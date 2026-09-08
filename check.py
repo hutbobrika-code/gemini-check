@@ -101,7 +101,10 @@ def curl(url, proxy=None, timeout=TIMEOUT, body_bytes=4096, follow=False):
     """Возвращает (код, тело, размер, секунды, конечный_url). Код 0 — не дозвонились."""
     out = tempfile.NamedTemporaryFile(delete=False)
     out.close()
+    hdr = tempfile.NamedTemporaryFile(delete=False)
+    hdr.close()
     cmd = ["curl", "-sS", "-m", str(timeout), "-A", UA, "-o", out.name,
+           "-D", hdr.name,
            "-w", "%{http_code} %{size_download} %{time_total} %{url_effective}"]
     if follow:
         cmd += ["-L", "--max-redirs", "5"]
@@ -115,6 +118,10 @@ def curl(url, proxy=None, timeout=TIMEOUT, body_bytes=4096, follow=False):
         size = int(parts[1]) if len(parts) > 1 else 0
         secs = float(parts[2]) if len(parts) > 2 else 0.0
         final = parts[3] if len(parts) > 3 else url
+        if 300 <= code < 400:
+            # curl остановился на редиректе (обычно упёрся в --max-redirs):
+            # url_effective тут бесполезен, настоящая цель — в последнем Location.
+            final = last_location(hdr.name) or final
         with open(out.name, "rb") as fh:
             body = fh.read(body_bytes).decode("utf-8", "replace")
         return code, body, size, secs, final
@@ -122,10 +129,21 @@ def curl(url, proxy=None, timeout=TIMEOUT, body_bytes=4096, follow=False):
         log(f"curl {url} через {proxy or 'direct'}: {exc}")
         return 0, "", 0, 0.0, url
     finally:
-        try:
-            os.unlink(out.name)
-        except OSError:
-            pass
+        for path in (out.name, hdr.name):
+            try:
+                os.unlink(path)
+            except OSError:
+                pass
+
+
+def last_location(header_file):
+    try:
+        with open(header_file, encoding="utf-8", errors="replace") as fh:
+            found = [ln.split(":", 1)[1].strip()
+                     for ln in fh if ln.lower().startswith("location:")]
+        return found[-1] if found else ""
+    except OSError:
+        return ""
 
 
 def probe_gemini(proxy):
@@ -185,11 +203,11 @@ def classify(r):
     if api_ok and web_ok:
         return "ok", ""
     if api_ok and not web_ok:
-        where = ""
         host = urllib.parse.urlparse(final).netloc
-        if host and host != "gemini.google.com":
-            where = f", увело на {host}"
-        return "degraded", f"API доступен, веб отдал {web or 'таймаут'}{where}"
+        if 300 <= web < 400:
+            target = host or final[:40] or "неизвестно куда"
+            return "degraded", f"API доступен, но веб гоняет по редиректам → {target}"
+        return "degraded", f"API доступен, веб отдал {web or 'таймаут'}"
     if web_ok and not api_ok:
         return "degraded", f"веб открывается, API отдал {api or 'таймаут'}"
     if api == 0 or web == 0:
