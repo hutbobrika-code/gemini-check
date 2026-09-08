@@ -42,6 +42,7 @@ jobs:
           SUB_URL: ${{ secrets.SUB_URL }}
           PROXIES: ${{ secrets.PROXIES }}
           PS_API_KEY: ${{ secrets.PS_API_KEY }}
+          AUTO_REPLACE: "1"
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           CHECK_NODES: ${{ secrets.SUB_URL != '' && '1' || '0' }}
           LISTEN_MINUTES: "300"

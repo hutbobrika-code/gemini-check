@@ -67,15 +67,22 @@ def handle_commands(updates, statuses):
 REPORT_ALWAYS = os.environ.get("REPORT_ALWAYS", "1") == "1"
 
 
-def scheduled_check(statuses):
+def scheduled_check(statuses, state):
     nodes, proxies = check.run_all()
     current = {f"{r['kind']}:{r['name']}": r.get("status") for r in nodes + proxies}
     changed = [k for k, v in current.items() if statuses.get(k) != v]
 
+    # Битые адреса и адреса под капчей меняем сразу: аренда недельная,
+    # ждать ручного вмешательства смысла нет.
+    replaced = check.auto_replace(proxies, state)
+
     if REPORT_ALWAYS:
         # Отчёт после каждой проверки: видно, какие адреса проверены и какие живы.
-        check.send_telegram(check.render(nodes, proxies, digest=True,
-                                         title="🕐 Плановая проверка"))
+        text = check.render(nodes, proxies, digest=True, title="🕐 Плановая проверка")
+        if replaced:
+            text += "\n\n<b>Замена адресов</b>\n" + "\n".join(
+                check.esc(n) for n in replaced)
+        check.send_telegram(text)
         if proxies:
             check.send_document(
                 f"proxy-{datetime.now(check.MSK):%d.%m-%H%M}.txt",
@@ -101,7 +108,7 @@ def main():
 
     while time.time() < deadline:
         if time.time() >= next_check:
-            statuses = scheduled_check(statuses)
+            statuses = scheduled_check(statuses, state)
             next_check = time.time() + CHECK_EVERY
 
         try:

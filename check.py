@@ -68,6 +68,9 @@ def load_config():
         "GEMINI_MODEL": "gemini-2.0-flash",
         # За сколько дней до конца аренды прокси предупреждать.
         "EXPIRY_WARN_DAYS": "3",
+        # Автозамена битых адресов и пауза между попытками по одному адресу.
+        "AUTO_REPLACE": "1",
+        "REPLACE_COOLDOWN_HOURS": "6",
         "PROXIES_FILE": os.path.join(BASE, "proxies.txt"),
         "STATE_FILE": os.path.join(BASE, "state", "state.json"),
         "TG_TOKEN": "",
@@ -442,6 +445,7 @@ def proxies_from_seller(api_key):
             if not p.get("ip") or not http_port:
                 continue
             items.append({
+                "ps_id": p.get("id"),
                 "host": p["ip"],
                 "http_port": int(http_port),
                 "socks_port": int(p.get("port_socks") or int(http_port) + 1),
@@ -473,6 +477,64 @@ def proxy_list():
             return items
         log("API продавца ничего не вернул — беру запасной список")
     return parse_proxies(proxies_source())
+
+
+def replace_proxy(api_key, ps_id):
+    """Просит продавца выдать взамен другой IP. Денег не тратит — это замена
+    в рамках уже оплаченной аренды, а не новая покупка."""
+    url = f"https://proxy-seller.com/personal/api/v1/{api_key}/proxy/replace"
+    body = json.dumps({"ids": [int(ps_id)]}).encode()
+    req = urllib.request.Request(url, data=body,
+                                 headers={"Content-Type": "application/json"})
+    try:
+        with urllib.request.urlopen(req, timeout=30) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+    except Exception as exc:  # noqa: BLE001
+        return False, str(exc)[:120]
+    if data.get("errors"):
+        return False, str(data["errors"])[:150]
+    return True, "продавец принял заявку на замену"
+
+
+def auto_replace(proxies, state):
+    """Меняет адреса, которые не работают или на которых Google требует капчу.
+
+    Заблокированный регион не меняем: там дело не в адресе, а в стране —
+    новый IP того же региона будет вести себя так же.
+    """
+    key = CFG["PS_API_KEY"].strip()
+    if CFG["AUTO_REPLACE"] != "1" or not key:
+        return []
+
+    done = state.setdefault("replaced", {})
+    cooldown = int(CFG["REPLACE_COOLDOWN_HOURS"]) * 3600
+    now = datetime.now(MSK)
+    notes = []
+
+    for r in proxies:
+        if not r.get("ps_id"):
+            continue
+        note = (r.get("note") or "").lower()
+        broken = r.get("status") == "down" or (
+            r.get("status") == "degraded" and "капч" in note)
+        if not broken:
+            continue
+
+        last = done.get(r["name"])
+        if last:
+            try:
+                if (now - datetime.fromisoformat(last)).total_seconds() < cooldown:
+                    continue  # уже меняли недавно — ждём, а не долбим продавца
+            except ValueError:
+                pass
+
+        ok, msg = replace_proxy(key, r["ps_id"])
+        done[r["name"]] = now.isoformat()
+        icon = "🔁" if ok else "⚠️"
+        notes.append(f"{icon} {r['name']}: {msg}")
+        log(f"замена {r['name']}: {msg}")
+
+    return notes
 
 
 def days_left(date_end):
@@ -515,7 +577,7 @@ def check_proxy(p):
     http_proxy = f"http://{auth}@{p['host']}:{p['http_port']}"
     socks_proxy = f"socks5h://{auth}@{p['host']}:{p['socks_port']}"
 
-    result = {"kind": "proxy", "name": p["host"],
+    result = {"kind": "proxy", "name": p["host"], "ps_id": p.get("ps_id"),
               "addr": f"{p['host']}:{p['http_port']}/{p['socks_port']}",
               "creds": {"user": p["user"], "password": p["password"],
                         "http_port": p["http_port"], "socks_port": p["socks_port"]}}
