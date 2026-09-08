@@ -97,12 +97,14 @@ def log(msg):
 
 # ─────────────────────────── пробы ───────────────────────────
 
-def curl(url, proxy=None, timeout=TIMEOUT, body_bytes=4096):
-    """Возвращает (http_code, тело_первых_N_байт, размер, секунды). code=0 — не дозвонились."""
+def curl(url, proxy=None, timeout=TIMEOUT, body_bytes=4096, follow=False):
+    """Возвращает (код, тело, размер, секунды, конечный_url). Код 0 — не дозвонились."""
     out = tempfile.NamedTemporaryFile(delete=False)
     out.close()
-    cmd = ["curl", "-sS", "-m", str(timeout), "-A", UA,
-           "-o", out.name, "-w", "%{http_code} %{size_download} %{time_total}"]
+    cmd = ["curl", "-sS", "-m", str(timeout), "-A", UA, "-o", out.name,
+           "-w", "%{http_code} %{size_download} %{time_total} %{url_effective}"]
+    if follow:
+        cmd += ["-L", "--max-redirs", "5"]
     if proxy:
         cmd += ["-x", proxy]
     cmd.append(url)
@@ -112,12 +114,13 @@ def curl(url, proxy=None, timeout=TIMEOUT, body_bytes=4096):
         code = int(parts[0]) if parts else 0
         size = int(parts[1]) if len(parts) > 1 else 0
         secs = float(parts[2]) if len(parts) > 2 else 0.0
+        final = parts[3] if len(parts) > 3 else url
         with open(out.name, "rb") as fh:
             body = fh.read(body_bytes).decode("utf-8", "replace")
-        return code, body, size, secs
+        return code, body, size, secs, final
     except Exception as exc:  # noqa: BLE001
         log(f"curl {url} через {proxy or 'direct'}: {exc}")
-        return 0, "", 0, 0.0
+        return 0, "", 0, 0.0, url
     finally:
         try:
             os.unlink(out.name)
@@ -130,7 +133,7 @@ def probe_gemini(proxy):
     r = {"exit_ip": None, "country": None, "org": None,
          "web_code": 0, "api_code": 0, "api_msg": "", "latency": 0.0}
 
-    code, body, _, secs = curl(IPINFO, proxy, timeout=15)
+    code, body, _, secs, _ = curl(IPINFO, proxy, timeout=15)
     r["latency"] = secs
     if code == 200:
         try:
@@ -141,13 +144,16 @@ def probe_gemini(proxy):
         except json.JSONDecodeError:
             pass
 
-    code, body, size, _ = curl(GEMINI_WEB, proxy)
+    # По редиректам идём: без -L страница-заглушка выглядела бы просто как 302,
+    # и было бы не видно, ведёт она на вход в аккаунт или на капчу Google.
+    code, body, size, _, final = curl(GEMINI_WEB, proxy, follow=True)
     r["web_code"] = code
     r["web_size"] = size
+    r["web_final"] = final
     low = body.lower()
     r["web_blocked_marker"] = any(m in low for m in BLOCK_MARKERS)
 
-    code, body, _, _ = curl(GEMINI_API, proxy)
+    code, body, _, _, _ = curl(GEMINI_API, proxy)
     r["api_code"] = code
     m = re.search(r'"message"\s*:\s*"([^"]+)"', body)
     r["api_msg"] = m.group(1) if m else ""
@@ -168,13 +174,22 @@ def classify(r):
     if r["web_blocked_marker"]:
         return "blocked", "страница Gemini: регион не поддерживается"
 
+    final = r.get("web_final") or ""
+    if "/sorry/" in final:
+        # Так Google отвечает на адреса, которые считает подозрительными.
+        return "degraded", "Google требует капчу — адрес помечен как подозрительный"
+
     api_ok = api == 400 and "api key not valid" in msg
     web_ok = web == 200 and r.get("web_size", 0) > 50_000
 
     if api_ok and web_ok:
         return "ok", ""
     if api_ok and not web_ok:
-        return "degraded", f"API доступен, веб отдал {web or 'таймаут'}"
+        where = ""
+        host = urllib.parse.urlparse(final).netloc
+        if host and host != "gemini.google.com":
+            where = f", увело на {host}"
+        return "degraded", f"API доступен, веб отдал {web or 'таймаут'}{where}"
     if web_ok and not api_ok:
         return "degraded", f"веб открывается, API отдал {api or 'таймаут'}"
     if api == 0 or web == 0:
@@ -364,7 +379,7 @@ def check_proxy(p):
               "addr": f"{p['host']}:{p['http_port']}/{p['socks_port']}"}
     result.update(probe_gemini(http_proxy))
 
-    code, _, _, _ = curl(IPINFO, socks_proxy, timeout=15)
+    code, _, _, _, _ = curl(IPINFO, socks_proxy, timeout=15)
     result["socks_ok"] = code == 200
     if not result["socks_ok"] and result["status"] == "ok":
         result["status"] = "degraded"
