@@ -137,13 +137,22 @@ def curl(url, proxy=None, timeout=TIMEOUT, body_bytes=4096, follow=False):
 
 
 def last_location(header_file):
+    """Куда в итоге ведёт цепочка редиректов.
+
+    Если в ней хоть раз мелькнул /sorry/ — возвращаем именно его: это страница
+    «докажите, что вы не робот», и она объясняет петлю целиком. Иначе цикл
+    выглядел бы как безобидный редирект сайта на самого себя.
+    """
     try:
         with open(header_file, encoding="utf-8", errors="replace") as fh:
             found = [ln.split(":", 1)[1].strip()
                      for ln in fh if ln.lower().startswith("location:")]
-        return found[-1] if found else ""
     except OSError:
         return ""
+    for url in found:
+        if "/sorry/" in url:
+            return url
+    return found[-1] if found else ""
 
 
 def probe_gemini(proxy):
@@ -194,7 +203,8 @@ def classify(r):
 
     final = r.get("web_final") or ""
     if "/sorry/" in final:
-        # Так Google отвечает на адреса, которые считает подозрительными.
+        # Так Google отвечает на адреса, которые считает подозрительными:
+        # выдаёт GOOGLE_ABUSE_EXEMPTION, не принимает его и шлёт на капчу снова.
         return "degraded", "Google требует капчу — адрес помечен как подозрительный"
 
     api_ok = api == 400 and "api key not valid" in msg
