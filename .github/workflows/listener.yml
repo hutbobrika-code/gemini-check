@@ -45,7 +45,8 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           CHECK_NODES: ${{ secrets.SUB_URL != '' && '1' || '0' }}
           LISTEN_MINUTES: "300"
-          CHECK_EVERY_SECONDS: "900"
+          CHECK_EVERY_SECONDS: "3600"
+          REPORT_ALWAYS: "1"
         run: python3 bot_listen.py
 
       - name: Сохранить состояние

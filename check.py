@@ -516,8 +516,12 @@ def check_proxy(p):
     socks_proxy = f"socks5h://{auth}@{p['host']}:{p['socks_port']}"
 
     result = {"kind": "proxy", "name": p["host"],
-              "addr": f"{p['host']}:{p['http_port']}/{p['socks_port']}"}
+              "addr": f"{p['host']}:{p['http_port']}/{p['socks_port']}",
+              "creds": {"user": p["user"], "password": p["password"],
+                        "http_port": p["http_port"], "socks_port": p["socks_port"]}}
     result.update(probe_gemini(http_proxy))
+    if p.get("country"):
+        result.setdefault("country_ps", p["country"])
 
     left = days_left(p.get("date_end"))
     if left is not None and left <= int(CFG["EXPIRY_WARN_DAYS"]):
@@ -660,6 +664,73 @@ def send_telegram(text, chat_ids=None, reply_to=None):
                 log(f"отчёт отправлен в чат {chat} (без ответа на сообщение)")
             except Exception as exc:  # noqa: BLE001
                 log(f"повтор без ответа тоже не прошёл: {tg_error(exc)}")
+
+
+def send_document(filename, content, caption="", chat_ids=None):
+    """Отправляет текстовый файл в чат. Данные прокси удобнее файлом:
+    в сообщении их не выделить одним куском и не скормить другому инструменту."""
+    token = CFG["TG_TOKEN"]
+    chats = chat_ids if chat_ids is not None else [
+        c.strip() for c in CFG["TG_CHAT_IDS"].split(",") if c.strip()]
+    if not token or not chats:
+        return
+    boundary = "----geminicheck" + str(int(time.time() * 1000))
+    for chat in chats:
+        parts = []
+        for name, value in (("chat_id", chat), ("caption", caption[:1000]),
+                            ("parse_mode", "HTML")):
+            parts.append(
+                f'--{boundary}\r\nContent-Disposition: form-data; name="{name}"'
+                f'\r\n\r\n{value}\r\n'.encode("utf-8"))
+        parts.append(
+            f'--{boundary}\r\nContent-Disposition: form-data; name="document";'
+            f' filename="{filename}"\r\nContent-Type: text/plain; charset=utf-8'
+            f'\r\n\r\n'.encode("utf-8"))
+        parts.append(content.encode("utf-8"))
+        parts.append(f"\r\n--{boundary}--\r\n".encode("utf-8"))
+        body = b"".join(parts)
+        req = urllib.request.Request(
+            f"https://api.telegram.org/bot{token}/sendDocument", data=body,
+            headers={"Content-Type": f"multipart/form-data; boundary={boundary}"})
+        try:
+            with urllib.request.urlopen(req, timeout=40) as resp:
+                resp.read()
+            log(f"файл {filename} отправлен в чат {chat}")
+        except Exception as exc:  # noqa: BLE001
+            log(f"файл не ушёл в чат {chat}: {tg_error(exc)}")
+
+
+def proxy_file_body(proxies):
+    """Готовый к вставке список: строка на прокси, в конце — статус проверки."""
+    now = datetime.now(MSK)
+    lines = [
+        f"# Прокси и результат проверки Gemini · {now:%d.%m.%Y %H:%M} МСК",
+        "# Формат: протокол://логин:пароль@адрес:порт",
+        "",
+    ]
+    for r in proxies:
+        creds = r.get("creds")
+        head = f"# {r['name']} — {STATUS_WORD.get(r.get('status'), r.get('status'))}"
+        details = []
+        if r.get("country"):
+            details.append(r["country"])
+        if r.get("note"):
+            details.append(r["note"])
+        if r.get("expiry"):
+            details.append(r["expiry"])
+        if details:
+            head += " (" + "; ".join(details) + ")"
+        lines.append(head)
+        if creds:
+            lines.append(f"http://{creds['user']}:{creds['password']}"
+                         f"@{r['name']}:{creds['http_port']}")
+            lines.append(f"socks5://{creds['user']}:{creds['password']}"
+                         f"@{r['name']}:{creds['socks_port']}")
+        lines.append("")
+
+    working = [r for r in proxies if r.get("status") == "ok"]
+    lines.append(f"# Итого рабочих: {len(working)} из {len(proxies)}")
+    return "\n".join(lines)
 
 
 def tg_error(exc):

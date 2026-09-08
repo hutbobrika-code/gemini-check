@@ -20,7 +20,7 @@ import check
 import bot_poll
 
 LISTEN_MINUTES = int(os.environ.get("LISTEN_MINUTES", "300"))
-CHECK_EVERY = int(os.environ.get("CHECK_EVERY_SECONDS", "900"))
+CHECK_EVERY = int(os.environ.get("CHECK_EVERY_SECONDS", "3600"))
 POLL_TIMEOUT = 50  # столько Telegram держит соединение, если сообщений нет
 
 
@@ -52,17 +52,36 @@ def handle_commands(updates, statuses):
     text = check.render(nodes, proxies, digest=True, title="📊 Статус по запросу")
     for chat_id, msg_id in requests.items():
         check.send_telegram(text, chat_ids=[chat_id], reply_to=msg_id)
+        if proxies:
+            check.send_document(
+                f"proxy-{datetime.now(check.MSK):%d.%m-%H%M}.txt",
+                check.proxy_file_body(proxies),
+                caption="Список прокси с результатом проверки",
+                chat_ids=[chat_id])
 
     # Проверка только что прошла — считаем её и плановой, иначе следом
     # прилетит «изменение», о котором уже отчитались.
     return {f"{r['kind']}:{r['name']}": r.get("status") for r in nodes + proxies}
 
 
+REPORT_ALWAYS = os.environ.get("REPORT_ALWAYS", "1") == "1"
+
+
 def scheduled_check(statuses):
     nodes, proxies = check.run_all()
     current = {f"{r['kind']}:{r['name']}": r.get("status") for r in nodes + proxies}
     changed = [k for k, v in current.items() if statuses.get(k) != v]
-    if changed and statuses:
+
+    if REPORT_ALWAYS:
+        # Отчёт после каждой проверки: видно, какие адреса проверены и какие живы.
+        check.send_telegram(check.render(nodes, proxies, digest=True,
+                                         title="🕐 Плановая проверка"))
+        if proxies:
+            check.send_document(
+                f"proxy-{datetime.now(check.MSK):%d.%m-%H%M}.txt",
+                check.proxy_file_body(proxies),
+                caption="Список прокси с результатом проверки")
+    elif changed and statuses:
         check.send_telegram(check.render_alert(nodes + proxies, statuses))
     elif changed:
         check.log("первый прогон в этой смене — состояние запомнено, молчим")
