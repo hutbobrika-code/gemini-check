@@ -1,0 +1,7 @@
+# Список прокси с логинами и паролями живёт в секрете PROXIES, а не в репозитории.
+proxies.txt
+config.env
+
+bin/
+xray.zip
+__pycache__/

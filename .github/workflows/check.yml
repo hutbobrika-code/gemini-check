@@ -1,0 +1,57 @@
+name: Проверка Gemini
+
+on:
+  schedule:
+    # Каждые 30 минут. GitHub может опаздывать на 5–15 минут — для монитора это норма.
+    - cron: "*/30 * * * *"
+  workflow_dispatch:
+    inputs:
+      force:
+        description: "Прислать полный отчёт, даже если ничего не изменилось"
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+
+# Плановая проверка и обработчик команд пишут один и тот же state — не даём им пересечься.
+concurrency:
+  group: gemini-check-state
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Поставить Xray
+        run: |
+          curl -sL -o xray.zip \
+            https://github.com/XTLS/Xray-core/releases/latest/download/Xray-linux-64.zip
+          mkdir -p bin
+          unzip -o -q xray.zip xray -d bin
+          chmod +x bin/xray
+          ./bin/xray version | head -1
+
+      - name: Проверить точки и отчитаться
+        env:
+          TG_TOKEN: ${{ secrets.TG_TOKEN }}
+          TG_CHAT_IDS: ${{ secrets.TG_CHAT_IDS }}
+          SUB_URL: ${{ secrets.SUB_URL }}
+          PROXIES: ${{ secrets.PROXIES }}
+          CHECK_NODES: ${{ secrets.SUB_URL != '' && '1' || '0' }}
+          DIGEST_HOURS: ${{ secrets.DIGEST_HOURS }}
+        run: |
+          python3 check.py ${{ inputs.force && '--force' || '' }}
+
+      - name: Сохранить состояние
+        run: |
+          git config user.name "gemini-check"
+          git config user.email "gemini-check@users.noreply.github.com"
+          git add state
+          git diff --staged --quiet && echo "состояние не изменилось" && exit 0
+          git commit -m "состояние проверки $(date -u '+%F %H:%M UTC')"
+          git pull --rebase --autostash
+          git push
