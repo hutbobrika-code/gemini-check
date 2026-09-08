@@ -1,0 +1,48 @@
+name: Разбор одной точки
+
+# Временный воркфлоу для ручной диагностики: показывает цепочку редиректов
+# и заголовки Google через конкретный прокси.
+
+on:
+  workflow_dispatch:
+    inputs:
+      host:
+        description: "IP прокси из списка"
+        required: true
+        default: "93.88.154.91"
+
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Трассировка
+        env:
+          PROXIES: ${{ secrets.PROXIES }}
+          HOST: ${{ inputs.host }}
+        run: |
+          line=$(printf '%s\n' "$PROXIES" | grep "^$HOST:" | head -1)
+          port=${line%%@*}; port=${port##*:}
+          creds=${line#*@}; user=${creds%%@*}; pass=${creds#*@}
+          PX="http://$user:$pass@$HOST:$port"
+          UA="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+
+          echo "=== куда выходим"
+          curl -s -m 20 -x "$PX" https://ipinfo.io/json
+
+          echo; echo "=== цепочка редиректов gemini.google.com/app"
+          curl -s -m 30 -x "$PX" -A "$UA" -o /dev/null -D - -L --max-redirs 6 \
+            -w '\nИТОГ code=%{http_code} redirects=%{num_redirects}\n' \
+            https://gemini.google.com/app \
+            | grep -iE '^(HTTP/|location:|set-cookie:|ИТОГ)' | cut -c1-160
+
+          echo; echo "=== та же ссылка с сохранением cookie между шагами"
+          curl -s -m 30 -x "$PX" -A "$UA" -c /tmp/c.txt -b /tmp/c.txt -o /dev/null \
+            -D - -L --max-redirs 6 -w '\nИТОГ code=%{http_code} redirects=%{num_redirects}\n' \
+            https://gemini.google.com/app \
+            | grep -iE '^(HTTP/|location:|ИТОГ)' | cut -c1-160
+
+          echo; echo "=== google.com для сравнения"
+          curl -s -m 20 -x "$PX" -A "$UA" -o /dev/null -D - -L --max-redirs 4 \
+            -w '\nИТОГ code=%{http_code} redirects=%{num_redirects}\n' \
+            https://www.google.com/ | grep -iE '^(HTTP/|location:|ИТОГ)' | cut -c1-160
