@@ -59,7 +59,9 @@ def main():
         return 0
 
     allowed = allowed_chats()
-    requests = []  # (chat_id, message_id) — на что отвечаем
+    # Одна команда на чат: если /status написали несколько раз подряд,
+    # незачем гонять проверку и слать одинаковый отчёт по разу на каждую.
+    requests = {}  # chat_id -> message_id последней команды
 
     for upd in updates:
         offset = max(offset, upd["update_id"] + 1)
@@ -70,7 +72,7 @@ def main():
             continue
         cmd = text.split()[0].split("@")[0].lower()
         if cmd in COMMANDS:
-            requests.append((chat_id, msg.get("message_id")))
+            requests[chat_id] = msg.get("message_id")
         elif cmd in ("/help", "/start"):
             check.send_telegram(HELP, chat_ids=[chat_id],
                                 reply_to=msg.get("message_id"))
@@ -82,14 +84,13 @@ def main():
     if not requests:
         return 0
 
-    # Несколько /status подряд обслуживаем одной проверкой.
-    for chat_id, msg_id in requests:
+    for chat_id, msg_id in requests.items():
         check.send_telegram("⏳ Проверяю, это займёт около минуты…",
                             chat_ids=[chat_id], reply_to=msg_id)
 
     nodes, proxies = check.run_all()
     text = check.render(nodes, proxies, digest=True, title="📊 Статус по запросу")
-    for chat_id, msg_id in requests:
+    for chat_id, msg_id in requests.items():
         check.send_telegram(text, chat_ids=[chat_id], reply_to=msg_id)
 
     # Раз проверка всё равно прогнана — обновим состояние, чтобы плановый
