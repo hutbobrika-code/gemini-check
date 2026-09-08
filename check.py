@@ -458,6 +458,45 @@ def tg_api(method, **params):
         return json.loads(resp.read().decode("utf-8"))
 
 
+STATUS_WORD = {
+    "ok": "работает",
+    "down": "не работает",
+    "blocked": "заблокирован",
+    "degraded": "работает частично",
+}
+
+
+def render_alert(rows, prev):
+    """Сообщение о поломке: сначала что именно слетело, потом общий счёт."""
+    now = datetime.now(MSK)
+    changed = [r for r in rows if prev.get(f"{r['kind']}:{r['name']}") != r.get("status")]
+    broken = [r for r in changed if r.get("status") != "ok"]
+
+    head = "🔴 Точка слетела" if broken else "🟢 Восстановление"
+    if len(changed) > 1:
+        head = "🔴 Изменения" if broken else "🟢 Восстановление"
+    lines = [f"<b>{head}</b> · {now:%d.%m %H:%M} МСК", ""]
+
+    for r in changed:
+        was = prev.get(f"{r['kind']}:{r['name']}")
+        icon = STATUS_ICON.get(r.get("status"), "❔")
+        became = STATUS_WORD.get(r.get("status"), r.get("status"))
+        prefix = "новая точка" if was is None else f"было «{STATUS_WORD.get(was, was)}»"
+        lines.append(f"{icon} <b>{esc(r['name'])}</b> — {prefix}, стало «{became}»")
+        if r.get("note"):
+            lines.append(f"    {esc(r['note'])}")
+        if r.get("exit_ip"):
+            lines.append(f"    выход: {esc(r.get('country') or '?')} {esc(r['exit_ip'])}")
+
+    for kind, title in (("node", "Узлы подписки"), ("proxy", "Прокси")):
+        group = [r for r in rows if r["kind"] == kind]
+        if group:
+            ok = sum(1 for r in group if r.get("status") == "ok")
+            lines.append("")
+            lines.append(f"{title}: Gemini открывается на {ok} из {len(group)}")
+    return "\n".join(lines).strip()
+
+
 def send_telegram(text, chat_ids=None, reply_to=None):
     token = CFG["TG_TOKEN"]
     chats = chat_ids if chat_ids is not None else [
@@ -550,11 +589,16 @@ def main():
     digest_slot = f"{now:%Y-%m-%d}-{now.hour}"
     digest_due = now.hour in hours and last_digest != digest_slot
 
-    if force or digest_due or changed:
-        text = render(nodes, proxies, digest=bool(force or digest_due or not changed))
-        if changed and not (force or digest_due):
-            text += "\n\n<i>Изменилось: " + esc(", ".join(
-                k.split(":", 1)[1] for k in changed)) + "</i>"
+    if force or digest_due:
+        text = render(nodes, proxies, digest=True)
+    elif changed:
+        # При поломке важно видеть сразу, что именно слетело, а не искать
+        # изменившуюся строку глазами в списке из полутора десятков точек.
+        text = render_alert(nodes + proxies, state.get("statuses", {}))
+    else:
+        text = None
+
+    if text:
         log("отчёт:\n" + text)
         if not quiet:
             send_telegram(text)
