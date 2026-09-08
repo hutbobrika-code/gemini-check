@@ -906,6 +906,9 @@ def main():
         log("отчёт:\n" + text)
         if not quiet:
             send_telegram(text)
+            if proxies:
+                send_document(f"proxy-{now:%d.%m-%H%M}.txt", proxy_file_body(proxies),
+                              caption="Список прокси с результатом проверки")
         if digest_due or force:
             state["last_digest"] = digest_slot
     else:
