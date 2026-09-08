@@ -460,11 +460,14 @@ def tg_api(method, **params):
     token = CFG["TG_TOKEN"]
     if not token:
         raise RuntimeError("не задан TG_TOKEN")
+    # При длинном опросе Telegram держит соединение сам — ждать надо дольше,
+    # чем он обещает молчать, иначе рвём связь на каждом пустом опросе.
+    wait = int(params.get("timeout") or 0) + 20
     data = urllib.parse.urlencode(
         {k: v for k, v in params.items() if v is not None}).encode()
     req = urllib.request.Request(
         f"https://api.telegram.org/bot{token}/{method}", data=data)
-    with urllib.request.urlopen(req, timeout=25) as resp:
+    with urllib.request.urlopen(req, timeout=max(wait, 25)) as resp:
         return json.loads(resp.read().decode("utf-8"))
 
 

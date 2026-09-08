@@ -1,0 +1,64 @@
+name: Слушатель команд
+
+# Одна долгоживущая задача вместо опроса по расписанию: она висит на длинном
+# опросе Telegram, поэтому /status отвечает за секунды. Задача в Actions живёт
+# не дольше шести часов, поэтому смена длится 5 часов и запускает себе следующую.
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Страховка на случай, если смена оборвалась и себя не перезапустила.
+    - cron: "0 * * * *"
+
+permissions:
+  contents: write
+  actions: write
+
+# Слушатель должен быть ровно один. Новый запуск ждёт, пока закончится текущий,
+# и стартует сразу после него — этим же и держится непрерывность.
+concurrency:
+  group: gemini-check-listener
+  cancel-in-progress: false
+
+jobs:
+  listen:
+    runs-on: ubuntu-latest
+    timeout-minutes: 340
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Поставить Xray
+        run: |
+          curl -sL -o xray.zip \
+            https://github.com/XTLS/Xray-core/releases/latest/download/Xray-linux-64.zip
+          mkdir -p bin
+          unzip -o -q xray.zip xray -d bin
+          chmod +x bin/xray
+
+      - name: Слушать и проверять
+        env:
+          TG_TOKEN: ${{ secrets.TG_TOKEN }}
+          TG_CHAT_IDS: ${{ secrets.TG_CHAT_IDS }}
+          SUB_URL: ${{ secrets.SUB_URL }}
+          PROXIES: ${{ secrets.PROXIES }}
+          CHECK_NODES: ${{ secrets.SUB_URL != '' && '1' || '0' }}
+          LISTEN_MINUTES: "300"
+          CHECK_EVERY_SECONDS: "900"
+        run: python3 bot_listen.py
+
+      - name: Сохранить состояние
+        if: always()
+        run: |
+          git config user.name "gemini-check"
+          git config user.email "gemini-check@users.noreply.github.com"
+          git add state
+          git diff --staged --quiet && echo "состояние не изменилось" && exit 0
+          git commit -m "состояние смены $(date -u '+%F %H:%M UTC')"
+          git pull --rebase --autostash
+          git push
+
+      - name: Запустить следующую смену
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh workflow run listener.yml --ref main
