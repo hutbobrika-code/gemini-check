@@ -59,8 +59,15 @@ def load_config():
     cfg = {
         "SUB_URL": "",
         "XRAY_BIN": os.path.join(BASE, "bin", "xray"),
-        # Список прокси: либо переменная PROXIES (многострочная, из секретов), либо файл.
+        # Список прокси: ключ API продавца, иначе переменная PROXIES, иначе файл.
+        "PS_API_KEY": "",
         "PROXIES": "",
+        # Настоящий ключ Gemini, если есть: тогда вместо косвенных признаков
+        # делается реальный запрос к модели.
+        "GEMINI_API_KEY": "",
+        "GEMINI_MODEL": "gemini-2.0-flash",
+        # За сколько дней до конца аренды прокси предупреждать.
+        "EXPIRY_WARN_DAYS": "3",
         "PROXIES_FILE": os.path.join(BASE, "proxies.txt"),
         "STATE_FILE": os.path.join(BASE, "state", "state.json"),
         "TG_TOKEN": "",
@@ -186,7 +193,51 @@ def probe_gemini(proxy):
     r["api_msg"] = m.group(1) if m else ""
 
     r["status"], r["note"] = classify(r)
+
+    # Косвенные признаки говорят «регион разрешён и адрес не забанен».
+    # Настоящий ответ модели это доказывает, но нужен рабочий ключ.
+    key = CFG["GEMINI_API_KEY"].strip()
+    if key and r["status"] in ("ok", "degraded"):
+        real_code, real_msg = real_gemini_call(proxy, key)
+        r["real_code"] = real_code
+        if real_code == 200:
+            r["status"], r["note"] = "ok", ""
+        elif real_code == 429:
+            r["status"], r["note"] = "ok", "модель отвечает, но упёрлись в лимит ключа"
+        elif real_code:
+            r["status"] = "blocked" if real_code == 403 else "degraded"
+            r["note"] = f"модель не ответила: {real_code} {real_msg[:70]}"
     return r
+
+
+def real_gemini_call(proxy, key):
+    """Просит модель ответить одним словом. 200 — Gemini через эту точку работает."""
+    body = ('{"contents":[{"parts":[{"text":"ping"}]}],'
+            '"generationConfig":{"maxOutputTokens":1}}')
+    url = ("https://generativelanguage.googleapis.com/v1beta/models/"
+           f"{CFG['GEMINI_MODEL']}:generateContent?key={key}")
+    out = tempfile.NamedTemporaryFile(delete=False)
+    out.close()
+    cmd = ["curl", "-sS", "-m", str(TIMEOUT), "-o", out.name,
+           "-w", "%{http_code}", "-H", "Content-Type: application/json",
+           "-d", body]
+    if proxy:
+        cmd += ["-x", proxy]
+    cmd.append(url)
+    try:
+        res = subprocess.run(cmd, capture_output=True, text=True, timeout=TIMEOUT + 10)
+        code = int(res.stdout.strip() or 0)
+        with open(out.name, encoding="utf-8", errors="replace") as fh:
+            text = fh.read(1000)
+        m = re.search(r'"message"\s*:\s*"([^"]+)"', text)
+        return code, (m.group(1) if m else "")
+    except Exception as exc:  # noqa: BLE001
+        return 0, str(exc)
+    finally:
+        try:
+            os.unlink(out.name)
+        except OSError:
+            pass
 
 
 def classify(r):
@@ -365,8 +416,47 @@ def describe_failure(result, xerr):
 
 # ─────────────────────────── прокси из orders.txt ───────────────────────────
 
+PS_TYPES = ("ipv4", "ipv6", "mix", "mix_isp", "isp", "mobile", "resident")
+
+
+def proxies_from_seller(api_key):
+    """Живой список из личного кабинета proxy-seller.
+
+    Лучше ручного списка тем, что сам подхватывает новые адреса и видит срок
+    аренды — о протухающих прокси можно предупредить заранее.
+    """
+    items = []
+    for kind in PS_TYPES:
+        url = f"https://proxy-seller.com/personal/api/v1/{api_key}/proxy/list/{kind}"
+        try:
+            with urllib.request.urlopen(url, timeout=25) as resp:
+                data = json.loads(resp.read().decode("utf-8"))
+        except Exception as exc:  # noqa: BLE001
+            log(f"proxy-seller {kind}: {exc}")
+            continue
+        if data.get("errors"):
+            log(f"proxy-seller {kind}: {data['errors']}")
+            continue
+        for p in (data.get("data") or {}).get("items") or []:
+            http_port = p.get("port_http")
+            if not p.get("ip") or not http_port:
+                continue
+            items.append({
+                "host": p["ip"],
+                "http_port": int(http_port),
+                "socks_port": int(p.get("port_socks") or int(http_port) + 1),
+                "user": p.get("login", ""),
+                "password": p.get("password", ""),
+                "country": p.get("country"),
+                "date_end": p.get("date_end"),
+                "kind_ps": kind,
+            })
+    log(f"proxy-seller отдал {len(items)} прокси")
+    return items
+
+
 def proxies_source():
-    """Список прокси приходит из секрета PROXIES, а при его отсутствии — из файла."""
+    """Список прокси: сначала API продавца, иначе секрет PROXIES, иначе файл."""
     if CFG["PROXIES"].strip():
         return CFG["PROXIES"].splitlines()
     path = CFG["PROXIES_FILE"]
@@ -374,6 +464,28 @@ def proxies_source():
         with open(path, encoding="utf-8") as fh:
             return fh.read().splitlines()
     return []
+
+
+def proxy_list():
+    if CFG["PS_API_KEY"].strip():
+        items = proxies_from_seller(CFG["PS_API_KEY"].strip())
+        if items:
+            return items
+        log("API продавца ничего не вернул — беру запасной список")
+    return parse_proxies(proxies_source())
+
+
+def days_left(date_end):
+    """Сколько дней осталось до конца аренды. Формат продавца — ДД.ММ.ГГГГ."""
+    if not date_end:
+        return None
+    for fmt in ("%d.%m.%Y", "%Y-%m-%d", "%d.%m.%Y %H:%M:%S"):
+        try:
+            end = datetime.strptime(date_end.strip(), fmt).replace(tzinfo=MSK)
+            return (end - datetime.now(MSK)).days
+        except ValueError:
+            continue
+    return None
 
 
 def parse_proxies(lines):
@@ -406,6 +518,11 @@ def check_proxy(p):
     result = {"kind": "proxy", "name": p["host"],
               "addr": f"{p['host']}:{p['http_port']}/{p['socks_port']}"}
     result.update(probe_gemini(http_proxy))
+
+    left = days_left(p.get("date_end"))
+    if left is not None and left <= int(CFG["EXPIRY_WARN_DAYS"]):
+        result["expiry"] = (f"аренда кончилась {p['date_end']}" if left < 0
+                            else f"аренда до {p['date_end']}, осталось дней: {left}")
 
     code, _, _, _, _ = curl(IPINFO, socks_proxy, timeout=15)
     result["socks_ok"] = code == 200
@@ -442,6 +559,8 @@ def render(nodes, proxies, digest, title=None):
             elif r.get("note"):
                 tail = f" · {esc(r['note'])}"
             lines.append(f"{icon} {esc(r['name'])}{geo}{tail}")
+            if r.get("expiry"):
+                lines.append(f"    ⏳ {esc(r['expiry'])}")
         lines.append("")
 
     block("Узлы подписки", nodes)
@@ -599,7 +718,7 @@ def run_all():
                       "note": f"не удалось получить список узлов: {exc}"}]
 
     if CFG["CHECK_PROXIES"] == "1":
-        plist = parse_proxies(proxies_source())
+        plist = proxy_list()
         log(f"прокси: {len(plist)} штук")
         if plist:
             with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as pool:

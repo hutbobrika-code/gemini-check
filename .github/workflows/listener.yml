@@ -41,6 +41,8 @@ jobs:
           TG_CHAT_IDS: ${{ secrets.TG_CHAT_IDS }}
           SUB_URL: ${{ secrets.SUB_URL }}
           PROXIES: ${{ secrets.PROXIES }}
+          PS_API_KEY: ${{ secrets.PS_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           CHECK_NODES: ${{ secrets.SUB_URL != '' && '1' || '0' }}
           LISTEN_MINUTES: "300"
           CHECK_EVERY_SECONDS: "900"
