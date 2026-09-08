@@ -479,11 +479,17 @@ def proxy_list():
     return parse_proxies(proxies_source())
 
 
-def replace_proxy(api_key, ps_id):
+def replace_proxy(api_key, ps_id, reason, comment):
     """Просит продавца выдать взамен другой IP. Денег не тратит — это замена
-    в рамках уже оплаченной аренды, а не новая покупка."""
+    в рамках уже оплаченной аренды, а не новая покупка.
+
+    Причина обязательна: без поля type продавец отвечает отказом со списком
+    допустимых значений (NOT_WORK / INCORRECT_LOCATION / CANT_CHANGE_NETWORK /
+    LOW_SPEED / CUSTOM).
+    """
     url = f"https://proxy-seller.com/personal/api/v1/{api_key}/proxy/replace"
-    body = json.dumps({"ids": [int(ps_id)]}).encode()
+    body = json.dumps({"ids": [int(ps_id)], "type": reason,
+                       "comment": comment}).encode()
     req = urllib.request.Request(url, data=body,
                                  headers={"Content-Type": "application/json"})
     try:
@@ -528,7 +534,14 @@ def auto_replace(proxies, state):
             except ValueError:
                 pass
 
-        ok, msg = replace_proxy(key, r["ps_id"])
+        if r.get("status") == "down":
+            reason = "NOT_WORK"
+            comment = "Proxy does not respond on http/socks5 ports"
+        else:
+            reason = "CUSTOM"
+            comment = "Google shows abuse captcha for this IP, Gemini web is unusable"
+
+        ok, msg = replace_proxy(key, r["ps_id"], reason, comment)
         done[r["name"]] = now.isoformat()
         icon = "🔁" if ok else "⚠️"
         notes.append(f"{icon} {r['name']}: {msg}")
