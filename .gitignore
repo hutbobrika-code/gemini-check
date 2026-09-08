@@ -5,3 +5,4 @@ config.env
 bin/
 xray.zip
 __pycache__/
+server.jar
