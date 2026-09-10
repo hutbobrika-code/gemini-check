@@ -452,6 +452,7 @@ def proxies_from_seller(api_key):
                 "user": p.get("login", ""),
                 "password": p.get("password", ""),
                 "country": p.get("country"),
+                "auto_renew": p.get("auto_renew"),
                 "date_end": p.get("date_end"),
                 "kind_ps": kind,
             })
@@ -619,10 +620,9 @@ def check_proxy(p):
     if p.get("country"):
         result.setdefault("country_ps", p["country"])
 
-    left = days_left(p.get("date_end"))
-    if left is not None and left <= int(CFG["EXPIRY_WARN_DAYS"]):
-        result["expiry"] = (f"аренда кончилась {p['date_end']}" if left < 0
-                            else f"аренда до {p['date_end']}, осталось дней: {left}")
+    result["date_end"] = p.get("date_end")
+    result["days_left"] = days_left(p.get("date_end"))
+    result["auto_renew"] = p.get("auto_renew")
 
     code, _, _, _, _ = curl(IPINFO, socks_proxy, timeout=15)
     result["socks_ok"] = code == 200
@@ -636,6 +636,36 @@ def check_proxy(p):
 
 def esc(s):
     return (str(s).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;"))
+
+
+def plural_days(n):
+    n = abs(n)
+    if 11 <= n % 100 <= 14:
+        return f"{n} дней"
+    return f"{n} " + {1: "день", 2: "дня", 3: "дня", 4: "дня"}.get(n % 10, "дней")
+
+
+def rent_line(r):
+    """Строка про аренду: до какого числа и сколько осталось."""
+    if not r.get("date_end"):
+        return ""
+    left = r.get("days_left")
+    end = esc(r["date_end"].rsplit(".", 1)[0])  # день и месяц, год лишний
+    renew = r.get("auto_renew") == "Y"
+
+    if left is None:
+        text = f"аренда до {end}"
+    elif left < 0:
+        text = f"аренда кончилась {end}"
+    elif left == 0:
+        text = f"аренда до {end} — сегодня последний день"
+    else:
+        text = f"аренда до {end}, осталось {plural_days(left)}"
+
+    if renew:
+        return f"🔄 {text} · автопродление включено"
+    icon = "⏳" if left is not None and left <= int(CFG["EXPIRY_WARN_DAYS"]) else "📅"
+    return f"{icon} {text}"
 
 
 def render(nodes, proxies, digest, title=None):
@@ -659,8 +689,9 @@ def render(nodes, proxies, digest, title=None):
             elif r.get("note"):
                 tail = f" · {esc(r['note'])}"
             lines.append(f"{icon} {esc(r['name'])}{geo}{tail}")
-            if r.get("expiry"):
-                lines.append(f"    ⏳ {esc(r['expiry'])}")
+            rent = rent_line(r)
+            if rent:
+                lines.append(f"    {rent}")
         lines.append("")
 
     block("Узлы подписки", nodes)
@@ -812,8 +843,12 @@ def proxy_file_body(proxies):
             details.append(r["country"])
         if r.get("note"):
             details.append(r["note"])
-        if r.get("expiry"):
-            details.append(r["expiry"])
+        if r.get("date_end"):
+            left = r.get("days_left")
+            renew = " автопродление" if r.get("auto_renew") == "Y" else ""
+            details.append(f"аренда до {r['date_end']}"
+                           + (f", осталось {plural_days(left)}" if left is not None else "")
+                           + renew)
         if details:
             head += " (" + "; ".join(details) + ")"
         lines.append(head)
