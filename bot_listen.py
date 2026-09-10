@@ -74,7 +74,20 @@ def scheduled_check(statuses, state):
 
     # Битые адреса и адреса под капчей меняем сразу: аренда недельная,
     # ждать ручного вмешательства смысла нет.
-    replaced = check.auto_replace(proxies, state)
+    requested = check.auto_replace(proxies, state)
+    done = check.detect_new_ips(proxies, state)
+
+    # О заменах пишем всегда, даже в режиме «только поломки»: смена адреса —
+    # это то, что нужно знать, иначе она проходит незамеченной.
+    if requested or done:
+        lines = ["<b>🔁 Замена адресов</b>", ""]
+        lines += [check.esc(n) for n in done]
+        if requested:
+            lines.append("")
+            lines.append("<i>Отправлены заявки продавцу:</i>")
+            lines += [check.esc(n) for n in requested]
+        check.send_telegram("\n".join(lines))
+    replaced = requested
 
     if REPORT_ALWAYS:
         # Отчёт после каждой проверки: видно, какие адреса проверены и какие живы.

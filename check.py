@@ -550,6 +550,27 @@ def auto_replace(proxies, state):
     return notes
 
 
+def detect_new_ips(proxies, state):
+    """Ловит момент, когда продавец выдал другой адрес взамен старого.
+
+    Заявку на замену мы отправляем сами, но выполняется она не мгновенно, и
+    узнать о ней можно только по смене IP у той же позиции аренды (ps_id).
+    """
+    known = state.setdefault("ips", {})
+    notes = []
+    for r in proxies:
+        pid = str(r.get("ps_id") or "")
+        if not pid:
+            continue
+        was = known.get(pid)
+        if was and was != r["name"]:
+            notes.append(f"🔁 {was} заменён на {r['name']}"
+                         + (f" ({r['country']})" if r.get("country") else ""))
+            log(f"замена выполнена: {was} → {r['name']}")
+        known[pid] = r["name"]
+    return notes
+
+
 def days_left(date_end):
     """Сколько дней осталось до конца аренды. Формат продавца — ДД.ММ.ГГГГ."""
     if not date_end:

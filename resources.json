@@ -1,0 +1,70 @@
+[
+  {
+    "id": "ipinfo",
+    "title": "куда выходит трафик",
+    "url": "https://ipinfo.io/json",
+    "extract": "\"ip\": \"([^\"]+)\"[\\s\\S]*?\"country\": \"([A-Z]{2})\"",
+    "ok_status": [200]
+  },
+  {
+    "id": "gemini-api",
+    "title": "Gemini API (главный признак геоблока)",
+    "url": "https://generativelanguage.googleapis.com/v1beta/models?key=AIzaSyINVALIDKEYFORPROBE",
+    "ok_status": [400],
+    "block_markers": ["User location is not supported", "location is not supported"],
+    "block_status": [403]
+  },
+  {
+    "id": "gemini-web",
+    "title": "веб-морда Gemini",
+    "url": "https://gemini.google.com/app",
+    "ok_status": [200, 302],
+    "block_markers": ["sorry/index", "unsupported_country"]
+  },
+  {
+    "id": "openai",
+    "title": "OpenAI API",
+    "url": "https://api.openai.com/v1/models",
+    "ok_status": [401],
+    "block_status": [403],
+    "block_markers": ["unsupported_country", "not supported"]
+  },
+  {
+    "id": "claude",
+    "title": "Anthropic API",
+    "url": "https://api.anthropic.com/v1/models",
+    "headers": ["anthropic-version: 2023-06-01"],
+    "ok_status": [401],
+    "block_status": [403],
+    "block_markers": ["Request not allowed", "unsupported"]
+  },
+  {
+    "id": "youtube",
+    "title": "YouTube",
+    "url": "https://www.youtube.com/",
+    "ok_status": [200],
+    "block_markers": ["sorry/index"]
+  },
+  {
+    "id": "netflix",
+    "title": "Netflix (карточка тайтла)",
+    "url": "https://www.netflix.com/title/80018499",
+    "follow": true,
+    "ok_status": [200],
+    "block_status": [403, 451],
+    "block_markers": ["not available in your country"]
+  },
+  {
+    "id": "instagram",
+    "title": "Instagram",
+    "url": "https://www.instagram.com/",
+    "ok_status": [200, 302]
+  },
+  {
+    "id": "ozon",
+    "title": "Ozon — должен идти мимо VPN (routing direct)",
+    "url": "https://www.ozon.ru/",
+    "ok_status": [200, 302, 307, 403],
+    "block_markers": []
+  }
+]
