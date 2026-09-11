@@ -24,8 +24,8 @@ CHECK_EVERY = int(os.environ.get("CHECK_EVERY_SECONDS", "3600"))
 POLL_TIMEOUT = 50  # столько Telegram держит соединение, если сообщений нет
 
 
-def handle_commands(updates, statuses):
-    """Отвечает на /status. Возвращает обновлённые статусы, если проверка была."""
+def handle_commands(updates, statuses, state):
+    """Обрабатывает команды чата. Возвращает статусы, обновлённые проверкой."""
     allowed = bot_poll.allowed_chats()
     requests = {}
     for upd in updates:
@@ -34,12 +34,20 @@ def handle_commands(updates, statuses):
         chat_id = str((msg.get("chat") or {}).get("id", ""))
         if not text.startswith("/") or chat_id not in allowed:
             continue
-        cmd = text.split()[0].split("@")[0].lower()
+        parts = text.split(maxsplit=1)
+        cmd = parts[0].split("@")[0].lower()
+        arg = parts[1].strip() if len(parts) > 1 else ""
+        msg_id = msg.get("message_id")
+
         if cmd in bot_poll.COMMANDS:
-            requests[chat_id] = msg.get("message_id")
+            requests[chat_id] = msg_id
+        elif cmd == "/check":
+            check_url(chat_id, msg_id, arg)
+        elif cmd == "/replaced":
+            check.send_telegram(check.render_replacements(state),
+                                chat_ids=[chat_id], reply_to=msg_id)
         elif cmd in ("/help", "/start"):
-            check.send_telegram(bot_poll.HELP, chat_ids=[chat_id],
-                                reply_to=msg.get("message_id"))
+            check.send_telegram(bot_poll.HELP, chat_ids=[chat_id], reply_to=msg_id)
 
     if not requests:
         return statuses
@@ -62,6 +70,25 @@ def handle_commands(updates, statuses):
     # Проверка только что прошла — считаем её и плановой, иначе следом
     # прилетит «изменение», о котором уже отчитались.
     return {f"{r['kind']}:{r['name']}": r.get("status") for r in nodes + proxies}
+
+
+def check_url(chat_id, msg_id, arg):
+    """Проверяет произвольный адрес через все точки — прокси и узлы подписки."""
+    url = check.normalize_target(arg)
+    if not url:
+        check.send_telegram(
+            "Укажите адрес: <code>/check youtube.com</code> "
+            "или <code>/check https://chat.openai.com</code>",
+            chat_ids=[chat_id], reply_to=msg_id)
+        return
+
+    host = check.esc(url)
+    check.send_telegram(f"⏳ Проверяю доступность {host} через все точки…",
+                        chat_ids=[chat_id], reply_to=msg_id)
+    nodes, proxies = check.run_all(probe=lambda px: check.probe_url(px, url))
+    text = check.render(nodes, proxies, digest=True,
+                        title=f"🔎 Доступность {host}")
+    check.send_telegram(text, chat_ids=[chat_id], reply_to=msg_id)
 
 
 REPORT_ALWAYS = os.environ.get("REPORT_ALWAYS", "1") == "1"
@@ -87,6 +114,9 @@ def scheduled_check(statuses, state):
             lines.append("<i>Отправлены заявки продавцу:</i>")
             lines += [check.esc(n) for n in requested]
         check.send_telegram("\n".join(lines))
+        # Историю замен сохраняем сразу: смена может оборваться, а это тот
+        # факт, который потом не восстановить.
+        check.save_state(state)
     replaced = requested
 
     if REPORT_ALWAYS:
@@ -137,7 +167,7 @@ def main():
         if updates:
             offset = max(u["update_id"] + 1 for u in updates)
             bot_poll.save_offset(offset)
-            statuses = handle_commands(updates, statuses)
+            statuses = handle_commands(updates, statuses, state)
 
     state["statuses"] = statuses
     state["updated_at"] = datetime.now(check.MSK).isoformat()

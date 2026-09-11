@@ -213,6 +213,59 @@ def probe_gemini(proxy):
     return r
 
 
+def probe_url(proxy, url):
+    """Проверка произвольного адреса через готовый прокси.
+
+    В отличие от пробы Gemini тут нет косвенных признаков геоблока — смотрим
+    на то, что отдал сам сайт: ответил ли, чем ответил и куда увёл.
+    """
+    r = {"exit_ip": None, "country": None, "latency": 0.0}
+    code, _, size, secs, final = curl(url, proxy, follow=True)
+    r["latency"] = secs
+    r["web_code"] = code
+    r["web_size"] = size
+    r["web_final"] = final
+
+    host = urllib.parse.urlparse(url).netloc.lower()
+    final_host = urllib.parse.urlparse(final).netloc.lower()
+
+    if code == 0:
+        r["status"], r["note"] = "down", "нет ответа"
+    elif code in (401, 403, 451):
+        r["status"], r["note"] = "blocked", f"доступ запрещён ({code})"
+    elif "/sorry/" in final:
+        r["status"], r["note"] = "degraded", "капча Google — адрес подозрительный"
+    elif 500 <= code < 600:
+        r["status"], r["note"] = "degraded", f"ошибка сервера ({code})"
+    elif code == 429:
+        r["status"], r["note"] = "degraded", "слишком много запросов (429)"
+    elif 300 <= code < 400:
+        r["status"], r["note"] = "degraded", f"редирект без конца → {final_host or final[:40]}"
+    elif 200 <= code < 300:
+        if final_host and host and final_host != host:
+            r["status"], r["note"] = "ok", f"открылось, но увело на {final_host}"
+        else:
+            r["status"], r["note"] = "ok", ""
+    else:
+        r["status"], r["note"] = "degraded", f"ответ {code}"
+    return r
+
+
+def normalize_target(text):
+    """Из «youtube.com» или «https://site/path» делает корректный адрес пробы."""
+    text = (text or "").strip()
+    if not text:
+        return None
+    if "://" not in text:
+        text = "https://" + text
+    parsed = urllib.parse.urlparse(text)
+    if parsed.scheme not in ("http", "https") or not parsed.netloc:
+        return None
+    if any(ch in text for ch in (" ", "\n", '"', "'")):
+        return None
+    return text
+
+
 def real_gemini_call(proxy, key):
     """Просит модель ответить одним словом. 200 — Gemini через эту точку работает."""
     body = ('{"contents":[{"parts":[{"text":"ping"}]}],'
@@ -351,7 +404,7 @@ def xray_error(log_path):
     return ""
 
 
-def check_node(entry, port_base):
+def check_node(entry, port_base, probe=None):
     name = entry.get("remarks", "без имени")
     result = {"kind": "node", "name": name, "addr": node_address(entry)}
     port = free_port(port_base)
@@ -389,7 +442,7 @@ def check_node(entry, port_base):
         if not wait_port(port):
             result.update(status="down", note="Xray не поднял локальный порт")
             return result
-        result.update(probe_gemini(f"socks5h://127.0.0.1:{port}"))
+        result.update((probe or probe_gemini)(f"socks5h://127.0.0.1:{port}"))
         if result["status"] == "down":
             result["note"] = describe_failure(result, xray_error(xlog))
     except Exception as exc:  # noqa: BLE001
@@ -544,11 +597,39 @@ def auto_replace(proxies, state):
 
         ok, msg = replace_proxy(key, r["ps_id"], reason, comment)
         done[r["name"]] = now.isoformat()
+        # Причину запоминаем к моменту, когда продавец выдаст новый адрес:
+        # тогда в истории будет видно, из-за чего адрес поменяли.
+        state.setdefault("replace_reason", {})[r["name"]] = (
+            "не отвечал" if reason == "NOT_WORK" else "капча Google")
         icon = "🔁" if ok else "⚠️"
         notes.append(f"{icon} {r['name']}: {msg}")
         log(f"замена {r['name']}: {msg}")
 
     return notes
+
+
+def render_replacements(state, limit=20):
+    """История замен: какой адрес на какой поменяли и когда."""
+    log_entries = state.get("replacement_log") or []
+    lines = ["<b>🔁 Замены адресов</b>", ""]
+    if not log_entries:
+        lines.append("Замен не было — все адреса те же, что выдал продавец.")
+    else:
+        for e in log_entries[-limit:]:
+            when = e.get("when", "")[:16].replace("T", " ")
+            country = f" · {esc(e['country'])}" if e.get("country") else ""
+            lines.append(f"{esc(e.get('old'))} → <b>{esc(e.get('new'))}</b>{country}")
+            lines.append(f"    {esc(when)} МСК · причина: {esc(e.get('reason', '—'))}")
+        lines.append("")
+        lines.append(f"Всего замен: {len(log_entries)}")
+
+    pending = state.get("replaced") or {}
+    if pending:
+        lines.append("")
+        lines.append("<i>Последние заявки продавцу:</i>")
+        for ip, when in list(pending.items())[-10:]:
+            lines.append(f"{esc(ip)} — {esc(when[:16].replace('T', ' '))} МСК")
+    return "\n".join(lines)
 
 
 def detect_new_ips(proxies, state):
@@ -568,6 +649,12 @@ def detect_new_ips(proxies, state):
             notes.append(f"🔁 {was} заменён на {r['name']}"
                          + (f" ({r['country']})" if r.get("country") else ""))
             log(f"замена выполнена: {was} → {r['name']}")
+            state.setdefault("replacement_log", []).append({
+                "when": datetime.now(MSK).isoformat(),
+                "old": was, "new": r["name"],
+                "country": r.get("country") or r.get("country_ps"),
+                "reason": (state.get("replace_reason") or {}).get(was, "не работал"),
+            })
         known[pid] = r["name"]
     return notes
 
@@ -607,7 +694,7 @@ def parse_proxies(lines):
     return items
 
 
-def check_proxy(p):
+def check_proxy(p, probe=None):
     auth = f"{urllib.parse.quote(p['user'])}:{urllib.parse.quote(p['password'])}"
     http_proxy = f"http://{auth}@{p['host']}:{p['http_port']}"
     socks_proxy = f"socks5h://{auth}@{p['host']}:{p['socks_port']}"
@@ -616,7 +703,7 @@ def check_proxy(p):
               "addr": f"{p['host']}:{p['http_port']}/{p['socks_port']}",
               "creds": {"user": p["user"], "password": p["password"],
                         "http_port": p["http_port"], "socks_port": p["socks_port"]}}
-    result.update(probe_gemini(http_proxy))
+    result.update((probe or probe_gemini)(http_proxy))
     if p.get("country"):
         result.setdefault("country_ps", p["country"])
 
@@ -900,8 +987,12 @@ def save_state(state):
 
 # ─────────────────────────── main ───────────────────────────
 
-def run_all():
-    """Прогоняет все проверки и возвращает (узлы, прокси)."""
+def run_all(probe=None):
+    """Прогоняет все проверки и возвращает (узлы, прокси).
+
+    probe — чем именно проверять точку. По умолчанию Gemini; команда /check
+    подставляет сюда пробу произвольного адреса.
+    """
     port_base = int(CFG["SOCKS_PORT_BASE"])
     workers = int(CFG["WORKERS"])
     nodes, proxies = [], []
@@ -911,7 +1002,7 @@ def run_all():
             entries = fetch_subscription(CFG["SUB_URL"])
             log(f"подписка: {len(entries)} записей")
             with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as pool:
-                futures = [pool.submit(check_node, e, port_base + i * 5)
+                futures = [pool.submit(check_node, e, port_base + i * 5, probe)
                            for i, e in enumerate(entries)]
                 nodes = [f.result() for f in futures]
         except Exception as exc:  # noqa: BLE001
@@ -924,7 +1015,7 @@ def run_all():
         log(f"прокси: {len(plist)} штук")
         if plist:
             with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as pool:
-                proxies = list(pool.map(check_proxy, plist))
+                proxies = list(pool.map(lambda p: check_proxy(p, probe), plist))
 
     for r in nodes + proxies:
         log(f"{r.get('status'):9} {r['name']} — web={r.get('web_code')} "
