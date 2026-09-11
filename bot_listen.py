@@ -109,6 +109,11 @@ def scheduled_check(statuses, state):
     if requested or done:
         lines = ["<b>🔁 Замена адресов</b>", ""]
         lines += [check.esc(n) for n in done]
+        if done:
+            # Панель о замене не узнаёт: там свой конфиг со старым адресом.
+            lines.append("")
+            lines.append("⚠️ Новый адрес нужно прописать в Remnawave — "
+                         "сам он туда не попадёт.")
         if requested:
             lines.append("")
             lines.append("<i>Отправлены заявки продавцу:</i>")
