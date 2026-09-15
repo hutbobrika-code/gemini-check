@@ -16,6 +16,8 @@
 Отчёт уходит в Telegram: при смене состояния — сразу, плюс дайджест в заданные часы.
 """
 
+import base64
+import binascii
 import concurrent.futures
 import json
 import os
@@ -58,6 +60,8 @@ STATUS_ICON = {"ok": "✅", "blocked": "🚫", "down": "❌", "degraded": "⚠�
 def load_config():
     cfg = {
         "SUB_URL": "",
+        # Идентификатор устройства, под которым монитор числится в панели.
+        "SUB_HWID": "gemini-check-monitor-0001",
         "XRAY_BIN": os.path.join(BASE, "bin", "xray"),
         # Список прокси: ключ API продавца, иначе переменная PROXIES, иначе файл.
         "PS_API_KEY": "",
@@ -335,12 +339,66 @@ def classify(r):
 # ─────────────────────────── узлы подписки ───────────────────────────
 
 def fetch_subscription(url):
-    req = urllib.request.Request(url, headers={"user-agent": "Happ/1.0"})
+    # Панель (Remnawave) без заголовков устройства отдаёт заглушку
+    # «Приложение не поддерживается» вместо конфигов. HWID фиксированный,
+    # чтобы монитор занимал в лимите устройств ровно одно место.
+    req = urllib.request.Request(url, headers={
+        "user-agent": "Happ/1.0",
+        "x-hwid": CFG["SUB_HWID"],
+        "x-device-os": "Linux",
+        "x-ver-os": "1",
+        "x-device-model": "gemini-check",
+    })
     with urllib.request.urlopen(req, timeout=30) as resp:
-        data = json.loads(resp.read().decode("utf-8"))
+        body = resp.read().decode("utf-8")
+        routing_hdr = resp.headers.get("routing", "")
+    try:
+        data = json.loads(body)
+    except ValueError:
+        raise ValueError("подписка вернула не JSON — панель не признала клиента "
+                         "(заглушка вместо конфигов)")
     if not isinstance(data, list):
         raise ValueError("подписка вернула не список конфигов (клиент не распознан?)")
+    sync_geo_files(routing_hdr)
     return data
+
+
+_GEO_SYNCED = set()
+
+
+def sync_geo_files(routing_hdr):
+    """Забирает geoip/geosite оттуда же, откуда их берёт Happ.
+
+    Правила подписки ссылаются на свои категории (geosite:category-ru-whitelist,
+    geoip:ru-banks…), которых нет в стандартных файлах Xray. Панель отдаёт
+    ссылки на нужные файлы в заголовке routing: happ://routing/onadd/<base64 json>.
+    """
+    m = re.search(r"/onadd/([A-Za-z0-9_\-=]+)", routing_hdr or "")
+    if not m:
+        return
+    try:
+        raw = m.group(1)
+        raw += "=" * (-len(raw) % 4)
+        info = json.loads(base64.urlsafe_b64decode(raw))
+    except (ValueError, binascii.Error) as exc:
+        log(f"заголовок routing не разобран: {exc}")
+        return
+    bin_dir = os.path.dirname(CFG["XRAY_BIN"])
+    for key, fname in (("Geoipurl", "geoip.dat"), ("Geositeurl", "geosite.dat")):
+        url = info.get(key)
+        if not url or url in _GEO_SYNCED:
+            continue
+        dst = os.path.join(bin_dir, fname)
+        try:
+            req = urllib.request.Request(url, headers={"user-agent": "Happ/1.0"})
+            with urllib.request.urlopen(req, timeout=120) as resp, \
+                    open(dst + ".part", "wb") as out:
+                shutil.copyfileobj(resp, out)
+            os.replace(dst + ".part", dst)
+            _GEO_SYNCED.add(url)
+            log(f"{fname}: обновлён из {url}")
+        except Exception as exc:  # noqa: BLE001
+            log(f"{fname}: не скачан ({exc}), остаётся стандартный")
 
 
 def free_port(start):
@@ -404,9 +462,11 @@ def xray_error(log_path):
     return ""
 
 
-def check_node(entry, port_base, probe=None):
+def check_node(entry, port_base, probe=None, stripped=False):
     name = entry.get("remarks", "без имени")
     result = {"kind": "node", "name": name, "addr": node_address(entry)}
+    if stripped:
+        entry = {k: v for k, v in entry.items() if k not in ("dns", "routing")}
     port = free_port(port_base)
 
     result["tcp"] = tcp_reachable(result["addr"])
@@ -425,6 +485,17 @@ def check_node(entry, port_base, probe=None):
     if entry.get("routing"):
         # правила подписки сохраняем: проверяем то, что видит реальный клиент
         cfg["routing"] = entry["routing"]
+        # Балансировщик leastPing без observatory Xray не запускает
+        # («not all dependencies are resolved»); клиент добавляет его сам.
+        selectors = [sel for b in entry["routing"].get("balancers", [])
+                     for sel in b.get("selector", [])]
+        if selectors and not (entry.get("observatory") or entry.get("burstObservatory")):
+            cfg["observatory"] = {"subjectSelector": selectors,
+                                  "probeUrl": "https://www.gstatic.com/generate_204",
+                                  "probeInterval": "10m", "enableConcurrency": True}
+    for key in ("observatory", "burstObservatory"):
+        if entry.get(key):
+            cfg[key] = entry[key]
 
     tmp = tempfile.NamedTemporaryFile("w", suffix=".json", delete=False, encoding="utf-8")
     json.dump(cfg, tmp, ensure_ascii=False)
@@ -440,11 +511,21 @@ def check_node(entry, port_base, probe=None):
                 start_new_session=True,
             )
         if not wait_port(port):
-            result.update(status="down", note="Xray не поднял локальный порт")
+            xerr = xray_error(xlog)
+            if not stripped and re.search(r"geosite|geoip|code not found", xerr, re.I):
+                # В стандартных geo-файлах нет категорий подписки — проверяем
+                # без её правил: весь трафик в первый outbound.
+                result["geo_note"] = "правила подписки отброшены: " + xerr
+                return check_node(entry, port_base, probe, stripped=True)
+            result.update(status="down", note="Xray не поднял локальный порт"
+                          + (f": {xerr}" if xerr else ""))
             return result
         result.update((probe or probe_gemini)(f"socks5h://127.0.0.1:{port}"))
         if result["status"] == "down":
             result["note"] = describe_failure(result, xray_error(xlog))
+        if stripped:
+            result["note"] = (result.get("note", "") + " (без правил подписки: "
+                              "нет geo-файлов панели)").strip()
     except Exception as exc:  # noqa: BLE001
         result.update(status="down", note=f"ошибка запуска Xray: {exc}")
     finally:

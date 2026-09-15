@@ -35,7 +35,7 @@ jobs:
           curl -sL -o xray.zip \
             https://github.com/XTLS/Xray-core/releases/latest/download/Xray-linux-64.zip
           mkdir -p bin
-          unzip -o -q xray.zip xray -d bin
+          unzip -o -q xray.zip xray geoip.dat geosite.dat -d bin
           chmod +x bin/xray
           ./bin/xray version | head -1
 
