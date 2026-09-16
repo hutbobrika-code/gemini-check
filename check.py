@@ -1370,13 +1370,14 @@ def save_state(state):
 
 # ─────────────────────────── main ───────────────────────────
 
-def run_all(probe=None):
+def run_all(probe=None, port_base=None):
     """Прогоняет все проверки и возвращает (узлы, прокси).
 
     probe — чем именно проверять точку. По умолчанию все площадки; команда /check
-    подставляет сюда пробу произвольного адреса.
+    подставляет сюда пробу произвольного адреса. port_base — с какого порта
+    брать локальные SOCKS: два прогона одновременно не должны делить порты.
     """
-    port_base = int(CFG["SOCKS_PORT_BASE"])
+    port_base = port_base or int(CFG["SOCKS_PORT_BASE"])
     workers = int(CFG["WORKERS"])
     nodes, proxies = [], []
 
