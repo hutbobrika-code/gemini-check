@@ -111,8 +111,13 @@ def log(msg):
 
 # ─────────────────────────── пробы ───────────────────────────
 
-def curl(url, proxy=None, timeout=TIMEOUT, body_bytes=4096, follow=False):
+def curl(url, proxy=None, timeout=TIMEOUT, body_bytes=4096, follow=False, headers=()):
     """Возвращает (код, тело, размер, секунды, конечный_url). Код 0 — не дозвонились."""
+    return curl_full(url, proxy, timeout, body_bytes, follow, headers)[:5]
+
+
+def curl_full(url, proxy=None, timeout=TIMEOUT, body_bytes=4096, follow=False, headers=()):
+    """То же, что curl, плюс шестым элементом — заголовки ответа одной строкой."""
     out = tempfile.NamedTemporaryFile(delete=False)
     out.close()
     hdr = tempfile.NamedTemporaryFile(delete=False)
@@ -120,6 +125,8 @@ def curl(url, proxy=None, timeout=TIMEOUT, body_bytes=4096, follow=False):
     cmd = ["curl", "-sS", "-m", str(timeout), "-A", UA, "-o", out.name,
            "-D", hdr.name,
            "-w", "%{http_code} %{size_download} %{time_total} %{url_effective}"]
+    for h in headers:
+        cmd += ["-H", h]
     if follow:
         cmd += ["-L", "--max-redirs", "5"]
     if proxy:
@@ -138,10 +145,12 @@ def curl(url, proxy=None, timeout=TIMEOUT, body_bytes=4096, follow=False):
             final = last_location(hdr.name) or final
         with open(out.name, "rb") as fh:
             body = fh.read(body_bytes).decode("utf-8", "replace")
-        return code, body, size, secs, final
+        with open(hdr.name, "rb") as fh:
+            resp_headers = fh.read(8192).decode("utf-8", "replace").lower()
+        return code, body, size, secs, final, resp_headers
     except Exception as exc:  # noqa: BLE001
         log(f"curl {url} через {proxy or 'direct'}: {exc}")
-        return 0, "", 0, 0.0, url
+        return 0, "", 0, 0.0, url, ""
     finally:
         for path in (out.name, hdr.name):
             try:
@@ -215,6 +224,147 @@ def probe_gemini(proxy):
             r["status"] = "blocked" if real_code == 403 else "degraded"
             r["note"] = f"модель не ответила: {real_code} {real_msg[:70]}"
     return r
+
+
+# ─────────────────────────── другие площадки ───────────────────────────
+
+SERVICES_FILE = os.path.join(BASE, "services.json")
+
+
+def load_services():
+    try:
+        with open(SERVICES_FILE, encoding="utf-8") as fh:
+            return json.load(fh)
+    except (OSError, json.JSONDecodeError) as exc:
+        log(f"services.json не прочитан: {exc}")
+        return []
+
+
+SERVICES = load_services()
+SERVICE_NAMES = {"gemini": "Gemini", **{s["id"]: s["name"] for s in SERVICES}}
+SERVICE_ORDER = ["gemini"] + [s["id"] for s in SERVICES]
+
+
+def probe_endpoint(proxy, spec):
+    """Одна проба площадки. Возвращает (статус, заметка, код).
+
+    Разделяем три разные вещи: сайт не отвечает (down), сайт отвечает и говорит
+    «не для вашего региона» (blocked), сайт отвечает, но не пускает робота —
+    капча, Cloudflare, 429 (degraded). Последнее — свойство адреса, а не страны.
+    """
+    code, body, size, secs, final, resp_hdr = curl_full(
+        spec["url"], proxy, timeout=int(spec.get("timeout", 15)),
+        follow=spec.get("follow", True), headers=spec.get("headers", ()))
+    low = body.lower()
+    antibot = ("cf-mitigated: challenge" in resp_hdr
+               or ("server: cloudflare" in resp_hdr and code in (403, 503))
+               or "just a moment" in low)
+    markers = [m.lower() for m in spec.get("blocked_markers", ())]
+    hit = next((m for m in markers if m in low), None)
+
+    if code == 0:
+        return "down", "не отвечает", code, secs
+    if "/sorry/" in final:
+        return "degraded", "капча Google", code, secs
+    if hit or code in spec.get("blocked_codes", ()):
+        return "blocked", f"регион не поддерживается ({code})", code, secs
+    if code in spec.get("ok", (200,)):
+        return "ok", "", code, secs
+    if antibot:
+        return "degraded", f"антибот Cloudflare ({code})", code, secs
+    if code == 429:
+        return "degraded", "слишком много запросов (429)", code, secs
+    if code in (401, 403, 451):
+        return "degraded", f"доступ закрыт ({code})", code, secs
+    if 300 <= code < 400:
+        host = urllib.parse.urlparse(final).netloc
+        return "degraded", f"редирект без конца → {host or final[:40]}", code, secs
+    if 500 <= code < 600:
+        return "degraded", f"ошибка сервера ({code})", code, secs
+    return "degraded", f"ответ {code}", code, secs
+
+
+def probe_service(proxy, svc):
+    """Площадка целиком: API — главный признак, веб — дополнительный."""
+    out = {"name": svc["name"]}
+    api = svc.get("api")
+    web = svc.get("web")
+    if api:
+        st, note, code, secs = probe_endpoint(proxy, api)
+        out.update(api_status=st, api_code=code, latency=secs)
+        if web:
+            wst, wnote, wcode, _ = probe_endpoint(proxy, web)
+            out.update(web_status=wst, web_code=wcode)
+            # Антибот Cloudflare на сайте — реакция на curl, а не на страну
+            # или адрес: для площадки с API это не считаем проблемой.
+            if st == "ok" and wst != "ok" and "антибот" not in wnote:
+                st, note = "degraded", f"API доступен, веб: {wnote}"
+            elif st == "down" and wst == "ok":
+                st, note = "degraded", "веб открывается, API не отвечает"
+        out.update(status=st, note=note)
+    else:
+        st, note, code, secs = probe_endpoint(proxy, web)
+        out.update(status=st, note=note, web_code=code, latency=secs)
+    return out
+
+
+def probe_all(proxy):
+    """Gemini плюс все площадки из services.json через готовый прокси."""
+    r = probe_gemini(proxy)
+    services = {"gemini": {"name": "Gemini", "status": r["status"], "note": r["note"],
+                           "latency": r.get("latency", 0.0)}}
+    if r["status"] == "down" and r["exit_ip"] is None:
+        # Канал мёртв — остальное проверять бессмысленно, всё было бы «не отвечает».
+        r["services"] = services
+        return r
+    with concurrent.futures.ThreadPoolExecutor(max_workers=4) as pool:
+        results = list(pool.map(lambda svc: probe_service(proxy, svc), SERVICES))
+    # Одиночный таймаут — обычно случайность, а не поломка. Перепроверяем,
+    # чтобы не слать «упало/поднялось» на каждый чих сети.
+    retry = [(svc, res) for svc, res in zip(SERVICES, results)
+             if res["status"] in ("down", "degraded") and "капч" not in res.get("note", "")]
+    if retry:
+        time.sleep(2)
+        with concurrent.futures.ThreadPoolExecutor(max_workers=4) as pool:
+            again = list(pool.map(lambda sr: probe_service(proxy, sr[0]), retry))
+        for (svc, _), res in zip(retry, again):
+            if res["status"] == "ok":
+                results[SERVICES.index(svc)] = res
+    for svc, res in zip(SERVICES, results):
+        services[svc["id"]] = res
+    r["services"] = services
+    r["status"], r["note"] = summarize_services(services)
+    return r
+
+
+def summarize_services(services):
+    """Итог по точке: все площадки открываются — ok; иначе перечисляем, что не так."""
+    bad = {k: v for k, v in services.items() if v["status"] != "ok"}
+    if not bad:
+        return "ok", ""
+    if all(v["status"] == "down" for v in services.values()):
+        return "down", "ни одна площадка не отвечает"
+
+    def group(st):
+        items = []
+        for k in SERVICE_ORDER:
+            v = bad.get(k)
+            if v and v["status"] == st:
+                note = v.get("note") or ""
+                # Причину пишем там, где она не очевидна из статуса.
+                items.append(f"{v['name']} ({note})" if note and st != "blocked"
+                             else v["name"])
+        return items
+
+    parts = []
+    for st in ("blocked", "down", "degraded"):
+        items = group(st)
+        if items:
+            parts.append(f"{STATUS_ICON[st]} " + ", ".join(items))
+    note = " · ".join(parts)
+    if any(v["status"] == "blocked" for v in bad.values()):
+        return "blocked", note
+    return "degraded", note
 
 
 def probe_url(proxy, url):
@@ -520,7 +670,7 @@ def check_node(entry, port_base, probe=None, stripped=False):
             result.update(status="down", note="Xray не поднял локальный порт"
                           + (f": {xerr}" if xerr else ""))
             return result
-        result.update((probe or probe_gemini)(f"socks5h://127.0.0.1:{port}"))
+        result.update((probe or probe_all)(f"socks5h://127.0.0.1:{port}"))
         if result["status"] == "down":
             result["note"] = describe_failure(result, xray_error(xlog))
         if stripped:
@@ -784,7 +934,7 @@ def check_proxy(p, probe=None):
               "addr": f"{p['host']}:{p['http_port']}/{p['socks_port']}",
               "creds": {"user": p["user"], "password": p["password"],
                         "http_port": p["http_port"], "socks_port": p["socks_port"]}}
-    result.update((probe or probe_gemini)(http_proxy))
+    result.update((probe or probe_all)(http_proxy))
     if p.get("country"):
         result.setdefault("country_ps", p["country"])
 
@@ -794,9 +944,10 @@ def check_proxy(p, probe=None):
 
     code, _, _, _, _ = curl(IPINFO, socks_proxy, timeout=15)
     result["socks_ok"] = code == 200
-    if not result["socks_ok"] and result["status"] == "ok":
+    if not result["socks_ok"] and result["status"] in ("ok", "degraded"):
+        socks_note = f"HTTP {p['http_port']} работает, SOCKS5 {p['socks_port']} — нет"
         result["status"] = "degraded"
-        result["note"] = f"HTTP {p['http_port']} работает, SOCKS5 {p['socks_port']} — нет"
+        result["note"] = " · ".join(x for x in (result.get("note"), socks_note) if x)
     return result
 
 
@@ -836,16 +987,35 @@ def rent_line(r):
     return f"{icon} {text}"
 
 
+def service_totals(rows):
+    """Сколько точек открывают каждую площадку: «Gemini 30/40 · ChatGPT 28/40»."""
+    rows = [r for r in rows if r.get("services")]
+    if not rows:
+        return ""
+    parts = []
+    for sid in SERVICE_ORDER:
+        have = [r for r in rows if sid in r["services"]]
+        if not have:
+            continue
+        ok = sum(1 for r in have if r["services"][sid]["status"] == "ok")
+        parts.append(f"{SERVICE_NAMES.get(sid, sid)} {ok}/{len(have)}")
+    return " · ".join(parts)
+
+
 def render(nodes, proxies, digest, title=None):
     now = datetime.now(MSK)
-    head = title or ("📊 Сводка Gemini" if digest else "🔔 Изменение доступности Gemini")
+    head = title or ("📊 Сводка доступности" if digest else "🔔 Изменение доступности")
     lines = [f"<b>{head}</b> · {now:%d.%m %H:%M} МСК", ""]
 
     def block(title, rows):
         if not rows:
             return
         ok = sum(1 for r in rows if r.get("status") == "ok")
-        lines.append(f"<b>{title}</b> — Gemini открывается на {ok} из {len(rows)}")
+        multi = any(r.get("services") for r in rows)
+        what = "всё открывается" if multi else "открывается"
+        lines.append(f"<b>{title}</b> — {what} на {ok} из {len(rows)}")
+        if multi:
+            lines.append(f"<i>{esc(service_totals(rows))}</i>")
         for r in rows:
             icon = STATUS_ICON.get(r.get("status"), "❔")
             geo = ""
@@ -854,9 +1024,13 @@ def render(nodes, proxies, digest, title=None):
             tail = ""
             if r.get("status") == "ok":
                 tail = f" · {r.get('latency', 0):.1f}s"
-            elif r.get("note"):
+            elif r.get("note") and not r.get("services"):
                 tail = f" · {esc(r['note'])}"
             lines.append(f"{icon} {esc(r['name'])}{geo}{tail}")
+            # Для точки с площадками причина идёт отдельной строкой:
+            # список «что не открывается» в одну строку с именем не помещается.
+            if r.get("services") and r.get("status") != "ok" and r.get("note"):
+                lines.append(f"    {esc(r['note'])}")
             rent = rent_line(r)
             if rent:
                 lines.append(f"    {rent}")
@@ -870,7 +1044,7 @@ def render(nodes, proxies, digest, title=None):
     if bad:
         lines.append(f"Проблемных точек: {len(bad)} из {len(total)}")
     else:
-        lines.append("Все точки отдают Gemini.")
+        lines.append("Все точки открывают все площадки.")
     return "\n".join(lines).strip()
 
 
@@ -897,25 +1071,67 @@ STATUS_WORD = {
 }
 
 
+def statuses_of(rows):
+    """Снимок состояния для сравнения между проверками.
+
+    Ключ точки — её итог, ключ «точка/площадка» — итог по конкретной площадке:
+    так замечается и падение канала целиком, и блокировка одной площадки.
+    """
+    out = {}
+    for r in rows:
+        key = f"{r['kind']}:{r['name']}"
+        out[key] = r.get("status")
+        for sid, svc in (r.get("services") or {}).items():
+            out[f"{key}/{sid}"] = svc.get("status")
+    return out
+
+
 def render_alert(rows, prev):
     """Сообщение о поломке: сначала что именно слетело, потом общий счёт."""
     now = datetime.now(MSK)
-    changed = [r for r in rows if prev.get(f"{r['kind']}:{r['name']}") != r.get("status")]
-    broken = [r for r in changed if r.get("status") != "ok"]
+    entries = []  # (точка, что изменилось: список строк, стало ли хуже)
+    for r in rows:
+        key = f"{r['kind']}:{r['name']}"
+        was = prev.get(key)
+        detail = []
+        worse = False
+        services = r.get("services") or {}
+        svc_changed = [(sid, svc) for sid, svc in services.items()
+                       if prev.get(f"{key}/{sid}") != svc.get("status")]
+        whole_down = r.get("status") == "down" and (not services or all(
+            v.get("status") == "down" for v in services.values()))
+        if was != r.get("status") and (not svc_changed or whole_down or was is None):
+            became = STATUS_WORD.get(r.get("status"), r.get("status"))
+            prefix = "новая точка" if was is None else f"было «{STATUS_WORD.get(was, was)}»"
+            detail.append(f"{prefix}, стало «{became}»")
+            if r.get("note"):
+                detail.append(esc(r["note"]))
+            worse = r.get("status") != "ok"
+        elif svc_changed:
+            for sid, svc in svc_changed:
+                old = prev.get(f"{key}/{sid}")
+                if old is None and svc.get("status") == "ok":
+                    continue  # площадка появилась в списке и сразу работает
+                icon = STATUS_ICON.get(svc.get("status"), "❔")
+                became = STATUS_WORD.get(svc.get("status"), svc.get("status"))
+                prefix = "" if old is None else f"было «{STATUS_WORD.get(old, old)}», "
+                note = f" — {esc(svc['note'])}" if svc.get("note") else ""
+                detail.append(f"{icon} {esc(svc['name'])}: {prefix}стало «{became}»{note}")
+                worse = worse or svc.get("status") != "ok"
+        if detail:
+            entries.append((r, detail, worse))
 
-    head = "🔴 Точка слетела" if broken else "🟢 Восстановление"
-    if len(changed) > 1:
-        head = "🔴 Изменения" if broken else "🟢 Восстановление"
+    broken = any(w for _, _, w in entries)
+    head = "🔴 Изменения" if broken else "🟢 Восстановление"
+    if len(entries) == 1 and broken and entries[0][0].get("status") == "down":
+        head = "🔴 Точка слетела"
     lines = [f"<b>{head}</b> · {now:%d.%m %H:%M} МСК", ""]
 
-    for r in changed:
-        was = prev.get(f"{r['kind']}:{r['name']}")
+    for r, detail, _ in entries:
         icon = STATUS_ICON.get(r.get("status"), "❔")
-        became = STATUS_WORD.get(r.get("status"), r.get("status"))
-        prefix = "новая точка" if was is None else f"было «{STATUS_WORD.get(was, was)}»"
-        lines.append(f"{icon} <b>{esc(r['name'])}</b> — {prefix}, стало «{became}»")
-        if r.get("note"):
-            lines.append(f"    {esc(r['note'])}")
+        lines.append(f"{icon} <b>{esc(r['name'])}</b>")
+        for d in detail:
+            lines.append(f"    {d}")
         if r.get("exit_ip"):
             lines.append(f"    выход: {esc(r.get('country') or '?')} {esc(r['exit_ip'])}")
 
@@ -924,7 +1140,10 @@ def render_alert(rows, prev):
         if group:
             ok = sum(1 for r in group if r.get("status") == "ok")
             lines.append("")
-            lines.append(f"{title}: Gemini открывается на {ok} из {len(group)}")
+            lines.append(f"{title}: всё открывается на {ok} из {len(group)}")
+            totals = service_totals(group)
+            if totals:
+                lines.append(f"<i>{esc(totals)}</i>")
     return "\n".join(lines).strip()
 
 
@@ -999,7 +1218,7 @@ def proxy_file_body(proxies):
     """Готовый к вставке список: строка на прокси, в конце — статус проверки."""
     now = datetime.now(MSK)
     lines = [
-        f"# Прокси и результат проверки Gemini · {now:%d.%m.%Y %H:%M} МСК",
+        f"# Прокси и результат проверки · {now:%d.%m.%Y %H:%M} МСК",
         "# Формат: протокол://логин:пароль@адрес:порт",
         "",
     ]
@@ -1071,7 +1290,7 @@ def save_state(state):
 def run_all(probe=None):
     """Прогоняет все проверки и возвращает (узлы, прокси).
 
-    probe — чем именно проверять точку. По умолчанию Gemini; команда /check
+    probe — чем именно проверять точку. По умолчанию все площадки; команда /check
     подставляет сюда пробу произвольного адреса.
     """
     port_base = int(CFG["SOCKS_PORT_BASE"])
@@ -1112,7 +1331,7 @@ def main():
     nodes, proxies = run_all()
 
     state = load_state()
-    current = {f"{r['kind']}:{r['name']}": r.get("status") for r in nodes + proxies}
+    current = statuses_of(nodes + proxies)
     changed = [k for k, v in current.items() if state.get("statuses", {}).get(k) != v]
 
     hours = {int(h) for h in re.findall(r"\d+", CFG["DIGEST_HOURS"])}

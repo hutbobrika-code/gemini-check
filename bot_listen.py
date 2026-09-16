@@ -53,7 +53,7 @@ def handle_commands(updates, statuses, state):
         return statuses
 
     for chat_id, msg_id in requests.items():
-        check.send_telegram("⏳ Проверяю, это займёт около минуты…",
+        check.send_telegram("⏳ Проверяю все площадки через все точки, это займёт несколько минут…",
                             chat_ids=[chat_id], reply_to=msg_id)
 
     nodes, proxies = check.run_all()
@@ -69,7 +69,7 @@ def handle_commands(updates, statuses, state):
 
     # Проверка только что прошла — считаем её и плановой, иначе следом
     # прилетит «изменение», о котором уже отчитались.
-    return {f"{r['kind']}:{r['name']}": r.get("status") for r in nodes + proxies}
+    return check.statuses_of(nodes + proxies)
 
 
 def check_url(chat_id, msg_id, arg):
@@ -96,7 +96,7 @@ REPORT_ALWAYS = os.environ.get("REPORT_ALWAYS", "1") == "1"
 
 def scheduled_check(statuses, state):
     nodes, proxies = check.run_all()
-    current = {f"{r['kind']}:{r['name']}": r.get("status") for r in nodes + proxies}
+    current = check.statuses_of(nodes + proxies)
     changed = [k for k, v in current.items() if statuses.get(k) != v]
 
     # Битые адреса и адреса под капчей меняем сразу: аренда недельная,
