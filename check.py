@@ -337,6 +337,30 @@ def probe_all(proxy):
     return r
 
 
+SHORT_NOTES = (
+    (r"слишком много запросов \(429\)", "429"),
+    (r"веб открывается, API отдал таймаут", "API молчит"),
+    (r"API доступен, веб отдал таймаут", "веб молчит"),
+    (r"API доступен, веб: не отвечает", "веб молчит"),
+    (r"API доступен, веб: (.*)", r"веб: \1"),
+    (r"веб открывается, API не отвечает", "API молчит"),
+    (r"Google требует капчу — адрес помечен как подозрительный", "капча Google"),
+    (r"регион не поддерживается \(\d+\)", ""),
+    (r"не отвечает", ""),
+    (r"таймаут на запросах к Google", "таймаут"),
+    (r"антибот Cloudflare \(\d+\)", "Cloudflare"),
+    (r"доступ закрыт \((\d+)\)", r"\1"),
+    (r"ошибка сервера \((\d+)\)", r"\1"),
+)
+
+
+def short_note(note):
+    """Заметка в пару слов: в списке из десятка площадок длинные фразы нечитаемы."""
+    for pat, rep in SHORT_NOTES:
+        note = re.sub(pat, rep, note)
+    return note.strip(" ·")
+
+
 def summarize_services(services):
     """Итог по точке: все площадки открываются — ok; иначе перечисляем, что не так."""
     bad = {k: v for k, v in services.items() if v["status"] != "ok"}
@@ -350,9 +374,9 @@ def summarize_services(services):
         for k in SERVICE_ORDER:
             v = bad.get(k)
             if v and v["status"] == st:
-                note = v.get("note") or ""
-                # Причину пишем там, где она не очевидна из статуса.
-                items.append(f"{v['name']} ({note})" if note and st != "blocked"
+                note = short_note(v.get("note") or "")
+                # Причину пишем только там, где она не очевидна из значка.
+                items.append(f"{v['name']} ({note})" if note and st == "degraded"
                              else v["name"])
         return items
 
@@ -964,87 +988,101 @@ def plural_days(n):
     return f"{n} " + {1: "день", 2: "дня", 3: "дня", 4: "дня"}.get(n % 10, "дней")
 
 
-def rent_line(r):
-    """Строка про аренду: до какого числа и сколько осталось."""
-    if not r.get("date_end"):
-        return ""
-    left = r.get("days_left")
-    end = esc(r["date_end"].rsplit(".", 1)[0])  # день и месяц, год лишний
-    renew = r.get("auto_renew") == "Y"
-
-    if left is None:
-        text = f"аренда до {end}"
-    elif left < 0:
-        text = f"аренда кончилась {end}"
-    elif left == 0:
-        text = f"аренда до {end} — сегодня последний день"
-    else:
-        text = f"аренда до {end}, осталось {plural_days(left)}"
-
-    if renew:
-        return f"🔄 {text} · автопродление включено"
-    icon = "⏳" if left is not None and left <= int(CFG["EXPIRY_WARN_DAYS"]) else "📅"
-    return f"{icon} {text}"
-
-
 def service_totals(rows):
-    """Сколько точек открывают каждую площадку: «Gemini 30/40 · ChatGPT 28/40»."""
-    rows = [r for r in rows if r.get("services")]
-    if not rows:
+    """Сколько точек открывают каждую площадку: «Gemini 23 · ChatGPT 22».
+
+    Считаем от всех точек: мёртвая точка не открывает ничего.
+    """
+    if not any(r.get("services") for r in rows):
         return ""
     parts = []
     for sid in SERVICE_ORDER:
-        have = [r for r in rows if sid in r["services"]]
-        if not have:
-            continue
-        ok = sum(1 for r in have if r["services"][sid]["status"] == "ok")
-        parts.append(f"{SERVICE_NAMES.get(sid, sid)} {ok}/{len(have)}")
+        ok = sum(1 for r in rows
+                 if (r.get("services") or {}).get(sid, {}).get("status") == "ok")
+        parts.append(f"{SERVICE_NAMES.get(sid, sid)} {ok}")
     return " · ".join(parts)
 
 
+def clean_name(name):
+    """Имя точки без служебных значков и двойных пробелов."""
+    return re.sub(r"\s+", " ", str(name).replace("☑️", "")).strip()
+
+
+def point_line(r, with_latency=True):
+    """Одна строка про точку: значок, имя, выход, а для проблемной — что не так."""
+    icon = STATUS_ICON.get(r.get("status"), "❔")
+    parts = [f"{icon} {esc(clean_name(r['name']))}"]
+    if r.get("country"):
+        parts.append(esc(r["country"]))
+    if r.get("status") == "ok":
+        if with_latency and r.get("latency"):
+            parts.append(f"{r['latency']:.1f}s")
+        return " · ".join(parts)
+    note = r.get("note") or ""
+    if not r.get("services"):
+        note = short_note(note)
+    return " · ".join(parts) + (f" — {esc(note)}" if note else "")
+
+
+def rent_short(r):
+    if not r.get("date_end"):
+        return ""
+    end = r["date_end"].rsplit(".", 1)[0]
+    left = r.get("days_left")
+    renew = "🔄" if r.get("auto_renew") == "Y" else ""
+    warn = "⏳" if (left is not None and left <= int(CFG["EXPIRY_WARN_DAYS"])
+                   and not renew) else ""
+    tail = ""
+    if left is not None and left < 0:
+        tail = " (кончилась)"
+    elif left == 0:
+        tail = " (последний день)"
+    return f"до {esc(end)}{tail} {renew}{warn}".strip()
+
+
 def render(nodes, proxies, digest, title=None):
+    """Сводка: сначала итог и проблемы, полный список — в сворачиваемой цитате."""
     now = datetime.now(MSK)
-    head = title or ("📊 Сводка доступности" if digest else "🔔 Изменение доступности")
+    head = title or ("📊 Доступность" if digest else "🔔 Изменение доступности")
     lines = [f"<b>{head}</b> · {now:%d.%m %H:%M} МСК", ""]
 
-    def block(title, rows):
-        if not rows:
-            return
-        ok = sum(1 for r in rows if r.get("status") == "ok")
-        multi = any(r.get("services") for r in rows)
-        what = "всё открывается" if multi else "открывается"
-        lines.append(f"<b>{title}</b> — {what} на {ok} из {len(rows)}")
-        if multi:
-            lines.append(f"<i>{esc(service_totals(rows))}</i>")
-        for r in rows:
-            icon = STATUS_ICON.get(r.get("status"), "❔")
-            geo = ""
-            if r.get("country"):
-                geo = f" · {esc(r['country'])} {esc(r.get('exit_ip') or '')}"
-            tail = ""
-            if r.get("status") == "ok":
-                tail = f" · {r.get('latency', 0):.1f}s"
-            elif r.get("note") and not r.get("services"):
-                tail = f" · {esc(r['note'])}"
-            lines.append(f"{icon} {esc(r['name'])}{geo}{tail}")
-            # Для точки с площадками причина идёт отдельной строкой:
-            # список «что не открывается» в одну строку с именем не помещается.
-            if r.get("services") and r.get("status") != "ok" and r.get("note"):
-                lines.append(f"    {esc(r['note'])}")
-            rent = rent_line(r)
-            if rent:
-                lines.append(f"    {rent}")
-        lines.append("")
-
-    block("Узлы подписки", nodes)
-    block("Прокси", proxies)
+    groups = [("Узлы подписки", nodes), ("Прокси", proxies)]
+    for gtitle, rows in groups:
+        if rows:
+            ok = sum(1 for r in rows if r.get("status") == "ok")
+            lines.append(f"{gtitle}: <b>{ok} из {len(rows)}</b> без замечаний")
 
     total = nodes + proxies
     bad = [r for r in total if r.get("status") != "ok"]
     if bad:
-        lines.append(f"Проблемных точек: {len(bad)} из {len(total)}")
-    else:
-        lines.append("Все точки открывают все площадки.")
+        lines += ["", "<b>Проблемы</b>"]
+        for r in sorted(bad, key=lambda x: ("down", "blocked", "degraded").index(
+                x.get("status")) if x.get("status") in ("down", "blocked", "degraded") else 9):
+            lines.append(point_line(r))
+
+    totals = service_totals(total)
+    if totals:
+        lines += ["", f"<b>По площадкам</b> · на скольких точках из {len(total)} открывается"]
+        lines.append(esc(totals))
+
+    # Полный перечень нужен не каждый раз — прячем в раскрывающуюся цитату,
+    # чтобы сообщение не превращалось в простыню.
+    detail = []
+    for gtitle, rows in groups:
+        if not rows:
+            continue
+        detail.append(f"<b>{gtitle}</b>")
+        for r in rows:
+            line = point_line(r)
+            rent = rent_short(r)
+            if rent:
+                line += f" · {rent}"
+            detail.append(line)
+        detail.append("")
+    if detail:
+        lines += ["", "<blockquote expandable>" + "\n".join(detail).strip() + "</blockquote>"]
+
+    lines += ["", "<i>🚫 регион не поддерживается · ❌ не отвечает · ⚠️ частично · 🔄 автопродление</i>"]
     return "\n".join(lines).strip()
 
 
@@ -1087,64 +1125,110 @@ def statuses_of(rows):
 
 
 def render_alert(rows, prev):
-    """Сообщение о поломке: сначала что именно слетело, потом общий счёт."""
+    """Что изменилось: по строке на точку, было → стало. Новые рабочие точки
+    не упоминаем — событие тут только проблема или её исчезновение."""
     now = datetime.now(MSK)
-    entries = []  # (точка, что изменилось: список строк, стало ли хуже)
+    entries = []   # (строка, стало ли хуже)
     for r in rows:
         key = f"{r['kind']}:{r['name']}"
         was = prev.get(key)
-        detail = []
-        worse = False
+        status = r.get("status")
         services = r.get("services") or {}
         svc_changed = [(sid, svc) for sid, svc in services.items()
-                       if prev.get(f"{key}/{sid}") != svc.get("status")]
-        whole_down = r.get("status") == "down" and (not services or all(
-            v.get("status") == "down" for v in services.values()))
-        if was != r.get("status") and (not svc_changed or whole_down or was is None):
-            became = STATUS_WORD.get(r.get("status"), r.get("status"))
-            prefix = "новая точка" if was is None else f"было «{STATUS_WORD.get(was, was)}»"
-            detail.append(f"{prefix}, стало «{became}»")
-            if r.get("note"):
-                detail.append(esc(r["note"]))
-            worse = r.get("status") != "ok"
-        elif svc_changed:
-            for sid, svc in svc_changed:
-                old = prev.get(f"{key}/{sid}")
-                if old is None and svc.get("status") == "ok":
-                    continue  # площадка появилась в списке и сразу работает
-                icon = STATUS_ICON.get(svc.get("status"), "❔")
-                became = STATUS_WORD.get(svc.get("status"), svc.get("status"))
-                prefix = "" if old is None else f"было «{STATUS_WORD.get(old, old)}», "
-                note = f" — {esc(svc['note'])}" if svc.get("note") else ""
-                detail.append(f"{icon} {esc(svc['name'])}: {prefix}стало «{became}»{note}")
-                worse = worse or svc.get("status") != "ok"
-        if detail:
-            entries.append((r, detail, worse))
+                       if prev.get(f"{key}/{sid}") != svc.get("status")
+                       and not (prev.get(f"{key}/{sid}") is None and svc.get("status") == "ok")]
+        name = esc(clean_name(r["name"]))
+        whole = status == "down" or was == "down" or was is None or not services
+        if was == status and not svc_changed:
+            continue
+        if whole:
+            if was is None and status == "ok":
+                continue
+            if was is None:
+                text = f"{name} — новая точка, {STATUS_ICON.get(status, '❔')}"
+            else:
+                text = f"{name} — {STATUS_ICON.get(was, '❔')} → {STATUS_ICON.get(status, '❔')}"
+            note = r.get("note") or ""
+            if status != "ok" and note:
+                text += f" {esc(note if services else short_note(note))}"
+            entries.append((text, status != "ok"))
+            continue
+        items = []
+        worse = False
+        for sid, svc in svc_changed:
+            old = prev.get(f"{key}/{sid}")
+            arrow = f"{STATUS_ICON.get(old, '❔')}→{STATUS_ICON.get(svc.get('status'), '❔')}"
+            note = short_note(svc.get("note") or "") if svc.get("status") == "degraded" else ""
+            items.append(f"{esc(svc['name'])} {arrow}" + (f" ({esc(note)})" if note else ""))
+            worse = worse or svc.get("status") != "ok"
+        if items:
+            entries.append((f"{name} — " + ", ".join(items), worse))
 
-    broken = any(w for _, _, w in entries)
+    if not entries:
+        return ""
+    broken = any(w for _, w in entries)
     head = "🔴 Изменения" if broken else "🟢 Восстановление"
-    if len(entries) == 1 and broken and entries[0][0].get("status") == "down":
-        head = "🔴 Точка слетела"
     lines = [f"<b>{head}</b> · {now:%d.%m %H:%M} МСК", ""]
+    lines += [t for t, _ in entries]
 
-    for r, detail, _ in entries:
-        icon = STATUS_ICON.get(r.get("status"), "❔")
-        lines.append(f"{icon} <b>{esc(r['name'])}</b>")
-        for d in detail:
-            lines.append(f"    {d}")
-        if r.get("exit_ip"):
-            lines.append(f"    выход: {esc(r.get('country') or '?')} {esc(r['exit_ip'])}")
-
-    for kind, title in (("node", "Узлы подписки"), ("proxy", "Прокси")):
+    counts = []
+    for kind, title in (("node", "узлы"), ("proxy", "прокси")):
         group = [r for r in rows if r["kind"] == kind]
         if group:
             ok = sum(1 for r in group if r.get("status") == "ok")
-            lines.append("")
-            lines.append(f"{title}: всё открывается на {ok} из {len(group)}")
-            totals = service_totals(group)
-            if totals:
-                lines.append(f"<i>{esc(totals)}</i>")
+            counts.append(f"{title} {ok}/{len(group)}")
+    lines += ["", "Без замечаний: " + ", ".join(counts)]
     return "\n".join(lines).strip()
+
+
+TG_LIMIT = 3900
+
+
+def split_message(text, limit=TG_LIMIT):
+    """Режет длинное сообщение по абзацам, не ломая HTML-цитату.
+
+    Telegram принимает до 4096 символов; разрез посреди <blockquote> даёт
+    ошибку разметки, и сообщение не уходит вовсе.
+    """
+    if len(text) <= limit:
+        return [text]
+
+    def by_lines(block, wrap=("", "")):
+        """Слишком длинный кусок делим по строкам, каждую часть заворачивая в wrap."""
+        open_tag, close_tag = wrap
+        room = limit - len(open_tag) - len(close_tag) - 2
+        pieces, cur = [], ""
+        for line in block.split("\n"):
+            if cur and len(cur) + len(line) + 1 > room:
+                pieces.append(open_tag + cur.strip() + close_tag)
+                cur = ""
+            cur += line + "\n"
+        if cur.strip():
+            pieces.append(open_tag + cur.strip() + close_tag)
+        return pieces
+
+    units = []
+    for seg in re.split(r"(<blockquote[^>]*>[\s\S]*?</blockquote>)", text):
+        if not seg.strip():
+            continue
+        m = re.match(r"(<blockquote[^>]*>)([\s\S]*)</blockquote>$", seg)
+        if m:
+            units += ([seg] if len(seg) <= limit
+                      else by_lines(m.group(2), (m.group(1), "</blockquote>")))
+            continue
+        for para in seg.split("\n\n"):
+            if para.strip():
+                units += [para] if len(para) <= limit else by_lines(para)
+
+    chunks, cur = [], ""
+    for u in units:
+        if cur and len(cur) + len(u) + 2 > limit:
+            chunks.append(cur.strip())
+            cur = ""
+        cur += u + "\n\n"
+    if cur.strip():
+        chunks.append(cur.strip())
+    return chunks
 
 
 def send_telegram(text, chat_ids=None, reply_to=None):
@@ -1154,8 +1238,7 @@ def send_telegram(text, chat_ids=None, reply_to=None):
     if not token or not chats:
         log("Telegram не настроен (TG_TOKEN/TG_CHAT_IDS) — отчёт только в лог")
         return
-    for chunk_start in range(0, len(text), 3800):
-        chunk = text[chunk_start:chunk_start + 3800]
+    for chunk_start, chunk in enumerate(split_message(text)):
         for chat in chats:
             answer_to = reply_to if chunk_start == 0 else None
             try:

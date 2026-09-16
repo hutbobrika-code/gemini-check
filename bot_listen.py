@@ -137,7 +137,11 @@ def scheduled_check(statuses, state):
                 check.proxy_file_body(proxies),
                 caption="Список прокси с результатом проверки")
     elif changed and statuses:
-        check.send_telegram(check.render_alert(nodes + proxies, statuses))
+        text = check.render_alert(nodes + proxies, statuses)
+        if text:
+            check.send_telegram(text)
+        else:
+            check.log("изменились только новые рабочие точки — молчим")
     elif changed:
         check.log("первый прогон в этой смене — состояние запомнено, молчим")
     else:
