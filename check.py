@@ -1040,8 +1040,34 @@ def rent_short(r):
     return f"до {esc(end)}{tail} {renew}{warn}".strip()
 
 
+def service_lines(rows):
+    """Взгляд со стороны площадки: на скольких точках открывается и где именно нет."""
+    rows = [r for r in rows if r.get("services")]
+    lines = []
+    for sid in SERVICE_ORDER:
+        have = [r for r in rows if sid in r["services"]]
+        if not have:
+            continue
+        bad = {"blocked": [], "down": [], "degraded": []}
+        for r in have:
+            svc = r["services"][sid]
+            st = svc.get("status")
+            if st in bad:
+                note = short_note(svc.get("note") or "") if st == "degraded" else ""
+                bad[st].append(esc(clean_name(r["name"])) + (f" ({esc(note)})" if note else ""))
+        ok = len(have) - sum(len(v) for v in bad.values())
+        # Значок площадки: 🚫 — где-то геоблок, ⚠️ — где-то не открывается, ✅ — везде.
+        icon = "🚫" if bad["blocked"] else ("⚠️" if bad["down"] or bad["degraded"] else "✅")
+        line = f"{icon} <b>{esc(SERVICE_NAMES.get(sid, sid))}</b> — {ok}/{len(have)}"
+        parts = [f"{STATUS_ICON[st]} " + ", ".join(names) for st, names in bad.items() if names]
+        if parts:
+            line += " · " + " · ".join(parts)
+        lines.append(line)
+    return lines
+
+
 def render(nodes, proxies, digest, title=None):
-    """Сводка: сначала итог и проблемы, полный список — в сворачиваемой цитате."""
+    """Сводка: итог и проблемы на виду, подробности — в раскрывающихся цитатах."""
     now = datetime.now(MSK)
     head = title or ("📊 Доступность" if digest else "🔔 Изменение доступности")
     lines = [f"<b>{head}</b> · {now:%d.%m %H:%M} МСК", ""]
@@ -1053,34 +1079,35 @@ def render(nodes, proxies, digest, title=None):
             lines.append(f"{gtitle}: <b>{ok} из {len(rows)}</b> без замечаний")
 
     total = nodes + proxies
-    bad = [r for r in total if r.get("status") != "ok"]
+    order = {"down": 0, "blocked": 1, "degraded": 2}
+    bad = sorted((r for r in total if r.get("status") != "ok"),
+                 key=lambda r: order.get(r.get("status"), 9))
     if bad:
         lines += ["", "<b>Проблемы</b>"]
-        for r in sorted(bad, key=lambda x: ("down", "blocked", "degraded").index(
-                x.get("status")) if x.get("status") in ("down", "blocked", "degraded") else 9):
-            lines.append(point_line(r))
+        lines += [point_line(r) for r in bad]
 
-    totals = service_totals(total)
-    if totals:
-        lines += ["", f"<b>По площадкам</b> · на скольких точках из {len(total)} открывается"]
-        lines.append(esc(totals))
+    def quote(title, body):
+        if body:
+            lines.append("")
+            lines.append(f"<blockquote expandable><b>{title}</b>\n" + "\n".join(body) + "</blockquote>")
 
-    # Полный перечень нужен не каждый раз — прячем в раскрывающуюся цитату,
-    # чтобы сообщение не превращалось в простыню.
-    detail = []
+    # Рабочие точки и разбор по площадкам прячем в раскрывающиеся цитаты:
+    # они нужны не каждый раз, а простыня из полусотни строк мешает.
+    good = []
     for gtitle, rows in groups:
-        if not rows:
+        ok_rows = [r for r in rows if r.get("status") == "ok"]
+        if not ok_rows:
             continue
-        detail.append(f"<b>{gtitle}</b>")
-        for r in rows:
+        good.append(f"<i>{gtitle}</i>")
+        for r in ok_rows:
             line = point_line(r)
             rent = rent_short(r)
-            if rent:
-                line += f" · {rent}"
-            detail.append(line)
-        detail.append("")
-    if detail:
-        lines += ["", "<blockquote expandable>" + "\n".join(detail).strip() + "</blockquote>"]
+            good.append(line + (f" · {rent}" if rent else ""))
+    n_services = len(SERVICE_ORDER)
+    quote(f"Без замечаний — {len([r for r in total if r.get('status') == 'ok'])} точек, "
+          f"все {n_services} площадок открываются", good)
+    quote(f"По площадкам — на скольких точках из {len(total)} открывается",
+          service_lines(total))
 
     lines += ["", "<i>🚫 регион не поддерживается · ❌ не отвечает · ⚠️ частично · 🔄 автопродление</i>"]
     return "\n".join(lines).strip()
@@ -1144,13 +1171,17 @@ def render_alert(rows, prev):
         if whole:
             if was is None and status == "ok":
                 continue
-            if was is None:
-                text = f"{name} — новая точка, {STATUS_ICON.get(status, '❔')}"
-            else:
-                text = f"{name} — {STATUS_ICON.get(was, '❔')} → {STATUS_ICON.get(status, '❔')}"
             note = r.get("note") or ""
             if status != "ok" and note:
-                text += f" {esc(note if services else short_note(note))}"
+                note = esc(note if services else short_note(note))
+            if was is None:
+                text = f"{name} — новая точка: {note or STATUS_ICON.get(status, '❔')}"
+            else:
+                text = f"{name} — {STATUS_ICON.get(was, '❔')} → {STATUS_ICON.get(status, '❔')}"
+                if note and not services:
+                    text += f" {note}"
+                elif note:
+                    text += f": {note}"
             entries.append((text, status != "ok"))
             continue
         items = []
