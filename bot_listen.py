@@ -99,19 +99,16 @@ def handle_commands(updates, state, checker):
 
 
 def answer_status(nodes, proxies, requests):
-    """Ответ тем, кто просил /status, по результату уже прошедшего прогона.
-    Возвращает отправленные сообщения — они же становятся актуальной сводкой."""
+    """Ответ тем, кто просил /status, по результату уже прошедшего прогона."""
     text = check.render(nodes, proxies, digest=True, title="📊 Статус по запросу")
-    sent = []
     for chat_id, msg_id in requests.items():
-        sent += check.send_telegram(text, chat_ids=[chat_id], reply_to=msg_id)
+        check.send_telegram(text, chat_ids=[chat_id], reply_to=msg_id)
         if proxies:
             check.send_document(
                 f"proxy-{datetime.now(check.MSK):%d.%m-%H%M}.txt",
                 check.proxy_file_body(proxies),
                 caption="Список прокси с результатом проверки",
                 chat_ids=[chat_id])
-    return sent
 
 
 def check_url(chat_id, msg_id, arg):
@@ -179,12 +176,8 @@ def with_status(r, confirmed):
     return r
 
 
-def scheduled_check(statuses, state, nodes, proxies, already_sent=None):
-    """Разбор результата прогона: замены, оповещения об изменениях, сводка.
-
-    already_sent — сводка, уже ушедшая в ответ на /status: второй раз её не шлём,
-    а считаем актуальной вместо ежечасной.
-    """
+def scheduled_check(statuses, state, nodes, proxies):
+    """Разбор результата прогона: замены и сообщение об изменениях."""
     observed = check.statuses_of(nodes + proxies)
     current = confirm_changes(statuses, observed, state)
     changed = [k for k, v in current.items() if statuses.get(k) != v]
@@ -214,30 +207,24 @@ def scheduled_check(statuses, state, nodes, proxies, already_sent=None):
         check.save_state(state)
     replaced = requested
 
+    # В группе живёт одно сообщение об изменениях: новое присылаем, прошлое
+    # убираем — так видно только актуальное, а не стопка старых событий.
     if changed and statuses:
         # Точки, чьё изменение ещё не подтверждено, показываем в прежнем
         # состоянии — иначе в отчёт попадёт и то, о чём решили пока молчать.
         view = [with_status(r, current) for r in nodes + proxies]
         text = check.render_alert(view, statuses)
-        if text:
-            check.send_telegram(text)
-    elif changed:
-        check.log("первый прогон в этой смене — состояние запомнено")
-
-    # Ежечасная сводка живёт в группе в одном экземпляре: новую шлём,
-    # прошлую убираем — чтобы в чате была только актуальная картина,
-    # а не стопка одинаковых отчётов.
-    if already_sent:
-        sent = already_sent
-    else:
-        text = check.render(nodes, proxies, digest=True, title="🕐 Проверка")
         if replaced:
             text += "\n\n<b>Замена адресов</b>\n" + "\n".join(check.esc(n) for n in replaced)
-        sent = check.send_telegram(text)
-    if sent:
-        check.delete_messages([tuple(x) for x in state.get("last_report") or []])
-        state["last_report"] = sent
-        check.save_state(state)
+        sent = check.send_telegram(text) if text else []
+        if sent:
+            check.delete_messages([tuple(x) for x in state.get("last_alert") or []])
+            state["last_alert"] = sent
+            check.save_state(state)
+    elif changed:
+        check.log("первый прогон в этой смене — состояние запомнено")
+    else:
+        check.log("изменений нет — молчим")
     return current
 
 
@@ -258,12 +245,11 @@ def main():
         done = checker.take()
         if done:
             nodes, proxies = done
-            answered = []
             if checker.requests:
-                answered = answer_status(nodes, proxies, checker.requests)
+                answer_status(nodes, proxies, checker.requests)
                 check.delete_messages(checker.acks)
                 checker.requests, checker.acks = {}, []
-            statuses = scheduled_check(statuses, state, nodes, proxies, answered)
+            statuses = scheduled_check(statuses, state, nodes, proxies)
 
         # Пока идёт прогон, опрашиваем коротко, чтобы отдать результат сразу.
         poll = 10 if checker.running() else POLL_TIMEOUT
