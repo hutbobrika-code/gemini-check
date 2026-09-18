@@ -425,5 +425,32 @@
  ],
  "replace_reason": {
   "185.13.225.69": "не отвечал"
- }
+ },
+ "pending": {
+  "node:🇷🇺 ☑️ Россия/gemini": "down",
+  "node:⚪️ Svoboda-Auto/gemini": "degraded",
+  "node:🔵 Svoboda-Auto/gemini": "degraded",
+  "node:⚪️ Svoboda: Экспериментальный 2/gemini": "degraded",
+  "node:🔵 Svoboda-MAX: Все операторы/gemini": "degraded",
+  "node:🔵 Svoboda-MAX: Yota, T-моб, Билайн/gemini": "degraded",
+  "node:🇳🇱 Нидерланды - 2  10Gb/s🔥/gemini": "degraded",
+  "node:📺 Youtube/instagram": "down",
+  "node:🇷🇺 ☑️ Россия": "down",
+  "node:🇰🇿 ☑️ Казахстан/gemini": "degraded",
+  "node:🇮🇳 ☑️ Индия/gemini": "degraded",
+  "node:🇭🇰 ☑️ Гонконг/gemini": "degraded",
+  "node:🇭🇰 ☑️ Гонконг/spotify": "degraded",
+  "node: 🇫🇷 ☑️ Франция/chatgpt": "ok",
+  "node: 🇫🇷 ☑️ Франция/claude": "down",
+  "node: 🇫🇷 ☑️ Франция/facebook": "down",
+  "node: 🇫🇷 ☑️ Франция/twitch": "down",
+  "node:🇩🇪 ☑️ Германия/instagram": "down",
+  "node:🇩🇪 ☑️ Германия/x": "ok"
+ },
+ "last_report": [
+  [
+   "-1003950923221",
+   280
+  ]
+ ]
 }
