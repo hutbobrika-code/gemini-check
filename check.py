@@ -1304,19 +1304,23 @@ def split_message(text, limit=TG_LIMIT):
 
 
 def send_telegram(text, chat_ids=None, reply_to=None):
+    """Шлёт сообщение (при необходимости — кусками). Возвращает список
+    (chat_id, message_id) отправленного — чтобы потом можно было убрать."""
     token = CFG["TG_TOKEN"]
     chats = chat_ids if chat_ids is not None else [
         c.strip() for c in CFG["TG_CHAT_IDS"].split(",") if c.strip()]
     if not token or not chats:
         log("Telegram не настроен (TG_TOKEN/TG_CHAT_IDS) — отчёт только в лог")
-        return
+        return []
+    sent = []
     for chunk_start, chunk in enumerate(split_message(text)):
         for chat in chats:
             answer_to = reply_to if chunk_start == 0 else None
             try:
-                tg_api("sendMessage", chat_id=chat, text=chunk,
-                       parse_mode="HTML", disable_web_page_preview="true",
-                       reply_to_message_id=answer_to)
+                resp = tg_api("sendMessage", chat_id=chat, text=chunk,
+                              parse_mode="HTML", disable_web_page_preview="true",
+                              reply_to_message_id=answer_to)
+                sent.append((chat, (resp.get("result") or {}).get("message_id")))
                 log(f"отчёт отправлен в чат {chat}")
                 continue
             except Exception as exc:  # noqa: BLE001
@@ -1328,11 +1332,25 @@ def send_telegram(text, chat_ids=None, reply_to=None):
             if not answer_to:
                 continue
             try:
-                tg_api("sendMessage", chat_id=chat, text=chunk,
-                       parse_mode="HTML", disable_web_page_preview="true")
+                resp = tg_api("sendMessage", chat_id=chat, text=chunk,
+                              parse_mode="HTML", disable_web_page_preview="true")
+                sent.append((chat, (resp.get("result") or {}).get("message_id")))
                 log(f"отчёт отправлен в чат {chat} (без ответа на сообщение)")
             except Exception as exc:  # noqa: BLE001
                 log(f"повтор без ответа тоже не прошёл: {tg_error(exc)}")
+    return sent
+
+
+def delete_messages(refs):
+    """Убирает свои старые сообщения. Telegram даёт боту удалять свои
+    сообщения в группе; старше 48 часов — уже нет, это не ошибка."""
+    for chat, mid in refs or []:
+        if not mid:
+            continue
+        try:
+            tg_api("deleteMessage", chat_id=chat, message_id=mid)
+        except Exception as exc:  # noqa: BLE001
+            log(f"старое сообщение {mid} в чате {chat} не удалено: {tg_error(exc)}")
 
 
 def send_document(filename, content, caption="", chat_ids=None):

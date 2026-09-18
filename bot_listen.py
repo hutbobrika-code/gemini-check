@@ -36,6 +36,7 @@ class Checker:
         self.thread = None
         self.result = None
         self.requests = {}   # chat_id → message_id тех, кто ждёт /status
+        self.acks = []       # наши «⏳ проверяю» — убираем, когда пришёл ответ
 
     def running(self):
         return self.thread is not None and self.thread.is_alive()
@@ -84,7 +85,7 @@ def handle_commands(updates, state, checker):
                 note = "⏳ Проверяю все площадки через все точки, это займёт несколько минут…"
             else:
                 note = "⏳ Проверка уже идёт — пришлю результат, как только закончится."
-            check.send_telegram(note, chat_ids=[chat_id], reply_to=msg_id)
+            checker.acks += check.send_telegram(note, chat_ids=[chat_id], reply_to=msg_id)
         elif cmd == "/check":
             # Отдельный прогон с другой пробой — в своём потоке, чтобы не
             # держать опрос команд.
@@ -98,16 +99,19 @@ def handle_commands(updates, state, checker):
 
 
 def answer_status(nodes, proxies, requests):
-    """Ответ тем, кто просил /status, по результату уже прошедшего прогона."""
+    """Ответ тем, кто просил /status, по результату уже прошедшего прогона.
+    Возвращает отправленные сообщения — они же становятся актуальной сводкой."""
     text = check.render(nodes, proxies, digest=True, title="📊 Статус по запросу")
+    sent = []
     for chat_id, msg_id in requests.items():
-        check.send_telegram(text, chat_ids=[chat_id], reply_to=msg_id)
+        sent += check.send_telegram(text, chat_ids=[chat_id], reply_to=msg_id)
         if proxies:
             check.send_document(
                 f"proxy-{datetime.now(check.MSK):%d.%m-%H%M}.txt",
                 check.proxy_file_body(proxies),
                 caption="Список прокси с результатом проверки",
                 chat_ids=[chat_id])
+    return sent
 
 
 def check_url(chat_id, msg_id, arg):
@@ -128,9 +132,6 @@ def check_url(chat_id, msg_id, arg):
     text = check.render(nodes, proxies, digest=True,
                         title=f"🔎 Доступность {host}")
     check.send_telegram(text, chat_ids=[chat_id], reply_to=msg_id)
-
-
-REPORT_ALWAYS = os.environ.get("REPORT_ALWAYS", "1") == "1"
 
 
 def confirm_changes(statuses, observed, state):
@@ -178,8 +179,12 @@ def with_status(r, confirmed):
     return r
 
 
-def scheduled_check(statuses, state, nodes, proxies):
-    """Разбор результата прогона: замены, оповещения об изменениях."""
+def scheduled_check(statuses, state, nodes, proxies, already_sent=None):
+    """Разбор результата прогона: замены, оповещения об изменениях, сводка.
+
+    already_sent — сводка, уже ушедшая в ответ на /status: второй раз её не шлём,
+    а считаем актуальной вместо ежечасной.
+    """
     observed = check.statuses_of(nodes + proxies)
     current = confirm_changes(statuses, observed, state)
     changed = [k for k, v in current.items() if statuses.get(k) != v]
@@ -209,31 +214,30 @@ def scheduled_check(statuses, state, nodes, proxies):
         check.save_state(state)
     replaced = requested
 
-    if REPORT_ALWAYS:
-        # Отчёт после каждой проверки: видно, какие адреса проверены и какие живы.
-        text = check.render(nodes, proxies, digest=True, title="🕐 Плановая проверка")
-        if replaced:
-            text += "\n\n<b>Замена адресов</b>\n" + "\n".join(
-                check.esc(n) for n in replaced)
-        check.send_telegram(text)
-        if proxies:
-            check.send_document(
-                f"proxy-{datetime.now(check.MSK):%d.%m-%H%M}.txt",
-                check.proxy_file_body(proxies),
-                caption="Список прокси с результатом проверки")
-    elif changed and statuses:
+    if changed and statuses:
         # Точки, чьё изменение ещё не подтверждено, показываем в прежнем
         # состоянии — иначе в отчёт попадёт и то, о чём решили пока молчать.
         view = [with_status(r, current) for r in nodes + proxies]
         text = check.render_alert(view, statuses)
         if text:
             check.send_telegram(text)
-        else:
-            check.log("изменились только новые рабочие точки — молчим")
     elif changed:
-        check.log("первый прогон в этой смене — состояние запомнено, молчим")
+        check.log("первый прогон в этой смене — состояние запомнено")
+
+    # Ежечасная сводка живёт в группе в одном экземпляре: новую шлём,
+    # прошлую убираем — чтобы в чате была только актуальная картина,
+    # а не стопка одинаковых отчётов.
+    if already_sent:
+        sent = already_sent
     else:
-        check.log("состояние не изменилось — молчим")
+        text = check.render(nodes, proxies, digest=True, title="🕐 Проверка")
+        if replaced:
+            text += "\n\n<b>Замена адресов</b>\n" + "\n".join(check.esc(n) for n in replaced)
+        sent = check.send_telegram(text)
+    if sent:
+        check.delete_messages([tuple(x) for x in state.get("last_report") or []])
+        state["last_report"] = sent
+        check.save_state(state)
     return current
 
 
@@ -254,10 +258,12 @@ def main():
         done = checker.take()
         if done:
             nodes, proxies = done
+            answered = []
             if checker.requests:
-                answer_status(nodes, proxies, checker.requests)
-                checker.requests = {}
-            statuses = scheduled_check(statuses, state, nodes, proxies)
+                answered = answer_status(nodes, proxies, checker.requests)
+                check.delete_messages(checker.acks)
+                checker.requests, checker.acks = {}, []
+            statuses = scheduled_check(statuses, state, nodes, proxies, answered)
 
         # Пока идёт прогон, опрашиваем коротко, чтобы отдать результат сразу.
         poll = 10 if checker.running() else POLL_TIMEOUT
