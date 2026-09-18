@@ -1008,20 +1008,47 @@ def clean_name(name):
     return re.sub(r"\s+", " ", str(name).replace("☑️", "")).strip()
 
 
-def point_line(r, with_latency=True):
-    """Одна строка про точку: значок, имя, выход, а для проблемной — что не так."""
+def plain_name(name):
+    """Имя без флагов и значков — для перечислений, где эмодзи только мешают."""
+    name = clean_name(name)
+    name = re.sub(r"[\U0001F1E6-\U0001F1FF\U0001F300-\U0001FAFF\u2600-\u27BF\u2B50\uFE0F\u200D]+", "", name)
+    return re.sub(r"\s+", " ", name).strip(" -·")
+
+
+def point_header(r):
+    """Первая строка про точку: значок, имя, страна выхода."""
     icon = STATUS_ICON.get(r.get("status"), "❔")
-    parts = [f"{icon} {esc(clean_name(r['name']))}"]
+    head = f"{icon} <b>{esc(clean_name(r['name']))}</b>"
     if r.get("country"):
-        parts.append(esc(r["country"]))
-    if r.get("status") == "ok":
-        if with_latency and r.get("latency"):
-            parts.append(f"{r['latency']:.1f}s")
-        return " · ".join(parts)
-    note = r.get("note") or ""
-    if not r.get("services"):
-        note = short_note(note)
-    return " · ".join(parts) + (f" — {esc(note)}" if note else "")
+        head += f" · {esc(r['country'])}"
+    return head
+
+
+def problem_lines(r):
+    """Что не так с точкой — по строке на вид проблемы, с отступом."""
+    services = r.get("services") or {}
+    if not services or r.get("status") == "down" and not any(
+            v.get("status") != "down" for v in services.values()):
+        note = r.get("note") or ""
+        return [f"    {esc(short_note(note) if not services else note)}"] if note else []
+    groups = {"blocked": [], "down": [], "degraded": []}
+    for sid in SERVICE_ORDER:
+        v = services.get(sid)
+        if v and v.get("status") in groups:
+            name = esc(v["name"])
+            if v["status"] == "degraded":
+                note = short_note(v.get("note") or "")
+                name += f" — {esc(note)}" if note else ""
+            groups[v["status"]].append(name)
+    out = []
+    if groups["blocked"]:
+        out.append("    🚫 регион: " + ", ".join(groups["blocked"]))
+    if groups["down"]:
+        verb = "не отвечает" if len(groups["down"]) == 1 else "не отвечают"
+        out.append(f"    ❌ {verb}: " + ", ".join(groups["down"]))
+    for item in groups["degraded"]:
+        out.append(f"    ⚠️ {item}")
+    return out
 
 
 def rent_short(r):
@@ -1029,21 +1056,19 @@ def rent_short(r):
         return ""
     end = r["date_end"].rsplit(".", 1)[0]
     left = r.get("days_left")
-    renew = "🔄" if r.get("auto_renew") == "Y" else ""
-    warn = "⏳" if (left is not None and left <= int(CFG["EXPIRY_WARN_DAYS"])
-                   and not renew) else ""
-    tail = ""
+    if r.get("auto_renew") == "Y":
+        return f"до {esc(end)} 🔄"
     if left is not None and left < 0:
-        tail = " (кончилась)"
-    elif left == 0:
-        tail = " (последний день)"
-    return f"до {esc(end)}{tail} {renew}{warn}".strip()
+        return f"аренда кончилась {esc(end)} ⛔"
+    if left is not None and left <= int(CFG["EXPIRY_WARN_DAYS"]):
+        return f"до {esc(end)} ⏳"
+    return f"до {esc(end)}"
 
 
 def service_lines(rows):
-    """Взгляд со стороны площадки: на скольких точках открывается и где именно нет."""
+    """Взгляд со стороны площадки: где открывается везде, а где именно нет."""
     rows = [r for r in rows if r.get("services")]
-    lines = []
+    everywhere, lines = [], []
     for sid in SERVICE_ORDER:
         have = [r for r in rows if sid in r["services"]]
         if not have:
@@ -1054,15 +1079,20 @@ def service_lines(rows):
             st = svc.get("status")
             if st in bad:
                 note = short_note(svc.get("note") or "") if st == "degraded" else ""
-                bad[st].append(esc(clean_name(r["name"])) + (f" ({esc(note)})" if note else ""))
+                bad[st].append(esc(plain_name(r["name"])) + (f" ({esc(note)})" if note else ""))
         ok = len(have) - sum(len(v) for v in bad.values())
-        # Значок площадки: 🚫 — где-то геоблок, ⚠️ — где-то не открывается, ✅ — везде.
-        icon = "🚫" if bad["blocked"] else ("⚠️" if bad["down"] or bad["degraded"] else "✅")
-        line = f"{icon} <b>{esc(SERVICE_NAMES.get(sid, sid))}</b> — {ok}/{len(have)}"
-        parts = [f"{STATUS_ICON[st]} " + ", ".join(names) for st, names in bad.items() if names]
-        if parts:
-            line += " · " + " · ".join(parts)
-        lines.append(line)
+        if ok == len(have):
+            everywhere.append(esc(SERVICE_NAMES.get(sid, sid)))
+            continue
+        lines.append(f"<b>{esc(SERVICE_NAMES.get(sid, sid))}</b> — {ok} из {len(have)}")
+        if bad["blocked"]:
+            lines.append("    🚫 " + ", ".join(bad["blocked"]))
+        if bad["down"]:
+            lines.append("    ❌ " + ", ".join(bad["down"]))
+        if bad["degraded"]:
+            lines.append("    ⚠️ " + ", ".join(bad["degraded"]))
+    if everywhere:
+        lines.insert(0, "✅ Везде: " + ", ".join(everywhere))
     return lines
 
 
@@ -1084,7 +1114,11 @@ def render(nodes, proxies, digest, title=None):
                  key=lambda r: order.get(r.get("status"), 9))
     if bad:
         lines += ["", "<b>Проблемы</b>"]
-        lines += [point_line(r) for r in bad]
+        for i, r in enumerate(bad):
+            if i:
+                lines.append("")
+            lines.append(point_header(r))
+            lines += problem_lines(r)
 
     def quote(title, body):
         if body:
@@ -1100,14 +1134,16 @@ def render(nodes, proxies, digest, title=None):
             continue
         good.append(f"<i>{gtitle}</i>")
         for r in ok_rows:
-            line = point_line(r)
+            line = f"✅ {esc(clean_name(r['name']))}"
+            if r.get("country"):
+                line += f" · {esc(r['country'])}"
             rent = rent_short(r)
-            good.append(line + (f" · {rent}" if rent else ""))
-    n_services = len(SERVICE_ORDER)
-    quote(f"Без замечаний — {len([r for r in total if r.get('status') == 'ok'])} точек, "
-          f"все {n_services} площадок открываются", good)
-    quote(f"По площадкам — на скольких точках из {len(total)} открывается",
-          service_lines(total))
+            if rent:
+                line += f" · {rent}"
+            good.append(line)
+    n_ok = len([r for r in total if r.get("status") == "ok"])
+    quote(f"Без замечаний — {n_ok} точек, все {len(SERVICE_ORDER)} площадок открываются", good)
+    quote(f"По площадкам — из {len(total)} точек", service_lines(total))
 
     lines += ["", "<i>🚫 регион не поддерживается · ❌ не отвечает · ⚠️ частично · 🔄 автопродление</i>"]
     return "\n".join(lines).strip()
@@ -1152,10 +1188,10 @@ def statuses_of(rows):
 
 
 def render_alert(rows, prev):
-    """Что изменилось: по строке на точку, было → стало. Новые рабочие точки
-    не упоминаем — событие тут только проблема или её исчезновение."""
+    """Что изменилось: точка, под ней переходы «было → стало» с перечнем площадок.
+    Новые рабочие точки не упоминаем — событие тут только проблема или её исчезновение."""
     now = datetime.now(MSK)
-    entries = []   # (строка, стало ли хуже)
+    blocks, worse_any = [], False
     for r in rows:
         key = f"{r['kind']}:{r['name']}"
         was = prev.get(key)
@@ -1164,51 +1200,56 @@ def render_alert(rows, prev):
         svc_changed = [(sid, svc) for sid, svc in services.items()
                        if prev.get(f"{key}/{sid}") != svc.get("status")
                        and not (prev.get(f"{key}/{sid}") is None and svc.get("status") == "ok")]
-        name = esc(clean_name(r["name"]))
         whole = status == "down" or was == "down" or was is None or not services
         if was == status and not svc_changed:
             continue
+        body = []
         if whole:
             if was is None and status == "ok":
                 continue
-            note = r.get("note") or ""
-            if status != "ok" and note:
-                note = esc(note if services else short_note(note))
             if was is None:
-                text = f"{name} — новая точка: {note or STATUS_ICON.get(status, '❔')}"
+                body.append("    новая точка")
+                body += problem_lines(r)
             else:
-                text = f"{name} — {STATUS_ICON.get(was, '❔')} → {STATUS_ICON.get(status, '❔')}"
-                if note and not services:
-                    text += f" {note}"
-                elif note:
-                    text += f": {note}"
-            entries.append((text, status != "ok"))
-            continue
-        items = []
-        worse = False
-        for sid, svc in svc_changed:
-            old = prev.get(f"{key}/{sid}")
-            arrow = f"{STATUS_ICON.get(old, '❔')}→{STATUS_ICON.get(svc.get('status'), '❔')}"
-            note = short_note(svc.get("note") or "") if svc.get("status") == "degraded" else ""
-            items.append(f"{esc(svc['name'])} {arrow}" + (f" ({esc(note)})" if note else ""))
-            worse = worse or svc.get("status") != "ok"
-        if items:
-            entries.append((f"{name} — " + ", ".join(items), worse))
+                arrow = f"{STATUS_ICON.get(was, '❔')} → {STATUS_ICON.get(status, '❔')}"
+                if status == "ok":
+                    body.append(f"    {arrow}  снова работает")
+                else:
+                    body.append(f"    {arrow}")
+                    body += problem_lines(r)
+            worse_any = worse_any or status != "ok"
+        else:
+            # Группируем по переходу: «✅ → ❌  Facebook, X, Telegram».
+            trans = {}
+            for sid, svc in svc_changed:
+                old = prev.get(f"{key}/{sid}")
+                arrow = f"{STATUS_ICON.get(old, '❔')} → {STATUS_ICON.get(svc.get('status'), '❔')}"
+                name = esc(svc["name"])
+                if svc.get("status") == "degraded":
+                    note = short_note(svc.get("note") or "")
+                    name += f" ({esc(note)})" if note else ""
+                trans.setdefault(arrow, []).append(name)
+                worse_any = worse_any or svc.get("status") != "ok"
+            for arrow, names in trans.items():
+                body.append(f"    {arrow}  " + ", ".join(names))
+        if body:
+            blocks.append([point_header(r)] + body)
 
-    if not entries:
+    if not blocks:
         return ""
-    broken = any(w for _, w in entries)
-    head = "🔴 Изменения" if broken else "🟢 Восстановление"
-    lines = [f"<b>{head}</b> · {now:%d.%m %H:%M} МСК", ""]
-    lines += [t for t, _ in entries]
+    head = "🔴 Изменения" if worse_any else "🟢 Восстановление"
+    lines = [f"<b>{head}</b> · {now:%d.%m %H:%M} МСК"]
+    for b in blocks:
+        lines.append("")
+        lines += b
 
     counts = []
     for kind, title in (("node", "узлы"), ("proxy", "прокси")):
         group = [r for r in rows if r["kind"] == kind]
         if group:
             ok = sum(1 for r in group if r.get("status") == "ok")
-            counts.append(f"{title} {ok}/{len(group)}")
-    lines += ["", "Без замечаний: " + ", ".join(counts)]
+            counts.append(f"{title} {ok} из {len(group)}")
+    lines += ["", "<i>Без замечаний: " + " · ".join(counts) + "</i>"]
     return "\n".join(lines).strip()
 
 

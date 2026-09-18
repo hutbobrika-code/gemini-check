@@ -133,9 +133,55 @@ def check_url(chat_id, msg_id, arg):
 REPORT_ALWAYS = os.environ.get("REPORT_ALWAYS", "1") == "1"
 
 
+def confirm_changes(statuses, observed, state):
+    """Изменение считается настоящим, если держится две проверки подряд.
+
+    Одиночный таймаут площадки на одном узле — обычное дело; без этого
+    каждый час приходила бы простыня «✅→❌» и «❌→✅» по одним и тем же местам.
+    Возвращает подтверждённое состояние (с него и считаются изменения).
+    """
+    pending = state.setdefault("pending", {})
+    confirmed = dict(statuses)
+    for key, val in observed.items():
+        if key not in statuses:
+            confirmed[key] = val            # новая точка или площадка
+            pending.pop(key, None)
+        elif val == statuses[key]:
+            pending.pop(key, None)          # вернулось само — ложная тревога
+        elif pending.get(key) == val:
+            confirmed[key] = val            # второй раз подряд — подтверждено
+            pending.pop(key, None)
+        else:
+            pending[key] = val              # ждём следующей проверки
+    for key in list(pending):
+        if key not in observed:
+            pending.pop(key)
+    return confirmed
+
+
+def with_status(r, confirmed):
+    """Копия точки, где статусы заменены на подтверждённые."""
+    key = f"{r['kind']}:{r['name']}"
+    r = dict(r)
+    r["status"] = confirmed.get(key, r.get("status"))
+    if r.get("services"):
+        svcs = {}
+        for sid, svc in r["services"].items():
+            svc = dict(svc)
+            svc["status"] = confirmed.get(f"{key}/{sid}", svc.get("status"))
+            svcs[sid] = svc
+        r["services"] = svcs
+        if r["status"] == "ok":
+            r["note"] = ""
+        elif r["status"] != "down":
+            r["status"], r["note"] = check.summarize_services(svcs)
+    return r
+
+
 def scheduled_check(statuses, state, nodes, proxies):
     """Разбор результата прогона: замены, оповещения об изменениях."""
-    current = check.statuses_of(nodes + proxies)
+    observed = check.statuses_of(nodes + proxies)
+    current = confirm_changes(statuses, observed, state)
     changed = [k for k, v in current.items() if statuses.get(k) != v]
 
     # Битые адреса и адреса под капчей меняем сразу: аренда недельная,
@@ -176,7 +222,10 @@ def scheduled_check(statuses, state, nodes, proxies):
                 check.proxy_file_body(proxies),
                 caption="Список прокси с результатом проверки")
     elif changed and statuses:
-        text = check.render_alert(nodes + proxies, statuses)
+        # Точки, чьё изменение ещё не подтверждено, показываем в прежнем
+        # состоянии — иначе в отчёт попадёт и то, о чём решили пока молчать.
+        view = [with_status(r, current) for r in nodes + proxies]
+        text = check.render_alert(view, statuses)
         if text:
             check.send_telegram(text)
         else:
