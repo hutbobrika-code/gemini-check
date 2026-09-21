@@ -91,7 +91,7 @@
   "node:🔵 Svoboda-MAX: Yota, T-моб, Билайн/spotify": "ok",
   "node:🔵 Svoboda-MAX: Yota, T-моб, Билайн/twitch": "ok",
   "node:🔵 Svoboda-MAX: Yota, T-моб, Билайн/github": "ok",
-  "node:🇳🇱 Нидерланды 10Gb/s🔥": "degraded",
+  "node:🇳🇱 Нидерланды 10Gb/s🔥": "down",
   "node:🇳🇱 Нидерланды 10Gb/s🔥/gemini": "down",
   "node:🇳🇱 Нидерланды 10Gb/s🔥/chatgpt": "ok",
   "node:🇳🇱 Нидерланды 10Gb/s🔥/claude": "ok",
@@ -121,7 +121,7 @@
   "node:🇳🇱 Нидерланды - 2  10Gb/s🔥/spotify": "ok",
   "node:🇳🇱 Нидерланды - 2  10Gb/s🔥/twitch": "ok",
   "node:🇳🇱 Нидерланды - 2  10Gb/s🔥/github": "ok",
-  "node:🇵🇱  ☑️ Польша ": "degraded",
+  "node:🇵🇱  ☑️ Польша ": "ok",
   "node:🇵🇱  ☑️ Польша /gemini": "ok",
   "node:🇵🇱  ☑️ Польша /chatgpt": "ok",
   "node:🇵🇱  ☑️ Польша /claude": "ok",
@@ -166,10 +166,10 @@
   "node:📺 Youtube/spotify": "blocked",
   "node:📺 Youtube/twitch": "ok",
   "node:📺 Youtube/github": "ok",
-  "node:🇷🇺 ☑️ Россия": "blocked",
-  "node:🇷🇺 ☑️ Россия/gemini": "degraded",
-  "node:🇷🇺 ☑️ Россия/chatgpt": "blocked",
-  "node:🇷🇺 ☑️ Россия/claude": "degraded",
+  "node:🇷🇺 ☑️ Россия": "degraded",
+  "node:🇷🇺 ☑️ Россия/gemini": "ok",
+  "node:🇷🇺 ☑️ Россия/chatgpt": "down",
+  "node:🇷🇺 ☑️ Россия/claude": "down",
   "node:🇷🇺 ☑️ Россия/youtube": "ok",
   "node:🇷🇺 ☑️ Россия/instagram": "down",
   "node:🇷🇺 ☑️ Россия/facebook": "down",
@@ -181,10 +181,10 @@
   "node:🇷🇺 ☑️ Россия/spotify": "down",
   "node:🇷🇺 ☑️ Россия/twitch": "ok",
   "node:🇷🇺 ☑️ Россия/github": "ok",
-  "node:🇰🇿 ☑️ Казахстан": "ok",
+  "node:🇰🇿 ☑️ Казахстан": "degraded",
   "node:🇰🇿 ☑️ Казахстан/gemini": "ok",
-  "node:🇰🇿 ☑️ Казахстан/chatgpt": "ok",
-  "node:🇰🇿 ☑️ Казахстан/claude": "ok",
+  "node:🇰🇿 ☑️ Казахстан/chatgpt": "down",
+  "node:🇰🇿 ☑️ Казахстан/claude": "down",
   "node:🇰🇿 ☑️ Казахстан/youtube": "ok",
   "node:🇰🇿 ☑️ Казахстан/instagram": "ok",
   "node:🇰🇿 ☑️ Казахстан/facebook": "ok",
@@ -242,15 +242,15 @@
   "node:🇭🇰 ☑️ Гонконг/twitch": "ok",
   "node:🇭🇰 ☑️ Гонконг/github": "ok",
   "node: 🇫🇷 ☑️ Франция": "degraded",
-  "node: 🇫🇷 ☑️ Франция/gemini": "degraded",
+  "node: 🇫🇷 ☑️ Франция/gemini": "ok",
   "node: 🇫🇷 ☑️ Франция/chatgpt": "ok",
-  "node: 🇫🇷 ☑️ Франция/claude": "down",
+  "node: 🇫🇷 ☑️ Франция/claude": "degraded",
   "node: 🇫🇷 ☑️ Франция/youtube": "ok",
   "node: 🇫🇷 ☑️ Франция/instagram": "ok",
   "node: 🇫🇷 ☑️ Франция/facebook": "ok",
   "node: 🇫🇷 ☑️ Франция/tiktok": "ok",
-  "node: 🇫🇷 ☑️ Франция/x": "ok",
-  "node: 🇫🇷 ☑️ Франция/discord": "ok",
+  "node: 🇫🇷 ☑️ Франция/x": "down",
+  "node: 🇫🇷 ☑️ Франция/discord": "down",
   "node: 🇫🇷 ☑️ Франция/telegram": "ok",
   "node: 🇫🇷 ☑️ Франция/netflix": "ok",
   "node: 🇫🇷 ☑️ Франция/spotify": "ok",
@@ -392,7 +392,7 @@
   "proxy:188.255.196.117/twitch": "ok",
   "proxy:188.255.196.117/github": "ok"
  },
- "updated_at": "2026-09-21T18:55:37.965511+03:00",
+ "updated_at": "2026-09-21T23:56:29.787110+03:00",
  "replaced": {
   "185.13.225.69": "2026-09-15T22:32:40.517956+03:00",
   "93.88.158.121": "2026-09-19T21:52:16.216027+03:00"
@@ -445,25 +445,19 @@
   "93.88.158.121": "не отвечал"
  },
  "pending": {
-  "node:⚪️ Svoboda-Auto": "degraded",
-  "node:⚪️ Svoboda-Auto/github": "degraded",
-  "node:⚪️ Svoboda: Экспериментальный/youtube": "down",
-  "node:⚪️ Svoboda: Экспериментальный 2": "degraded",
-  "node:⚪️ Svoboda: Экспериментальный 2/github": "degraded",
-  "node:🇳🇱 Нидерланды 10Gb/s🔥": "down",
-  "node:🇵🇱  ☑️ Польша /github": "degraded",
-  "node:🇷🇺 ☑️ Россия": "degraded",
-  "node:🇷🇺 ☑️ Россия/chatgpt": "down",
-  "node:🇷🇺 ☑️ Россия/facebook": "ok",
-  "node:🇷🇺 ☑️ Россия/github": "down",
-  "node:🇭🇰 ☑️ Гонконг/github": "degraded",
-  "node: 🇫🇷 ☑️ Франция/instagram": "down",
-  "node: 🇫🇷 ☑️ Франция/x": "down",
-  "node: 🇫🇷 ☑️ Франция/discord": "down",
-  "proxy:104.234.196.39": "degraded",
-  "proxy:104.234.196.39/github": "degraded",
-  "proxy:93.88.154.91": "degraded",
-  "proxy:93.88.154.91/github": "degraded"
+  "node:🔵 Svoboda-Auto": "blocked",
+  "node:🔵 Svoboda-Auto/chatgpt": "blocked",
+  "node:🔵 Svoboda-Auto/claude": "blocked",
+  "node:🔵 Svoboda-Auto/netflix": "blocked",
+  "node:🔵 Svoboda-Auto/spotify": "blocked",
+  "node:🇷🇺 ☑️ Россия": "blocked",
+  "node:🇷🇺 ☑️ Россия/youtube": "down",
+  "node:🇷🇺 ☑️ Россия/netflix": "blocked",
+  "node:🇷🇺 ☑️ Россия/spotify": "degraded",
+  "node:🇰🇿 ☑️ Казахстан/gemini": "degraded",
+  "node:🇰🇿 ☑️ Казахстан/chatgpt": "ok",
+  "node: 🇫🇷 ☑️ Франция/x": "ok",
+  "node: 🇫🇷 ☑️ Франция/telegram": "down"
  },
  "last_report": [
   [
@@ -474,7 +468,7 @@
  "last_alert": [
   [
    "-1003950923221",
-   366
+   371
   ]
  ]
 }
