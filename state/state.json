@@ -156,7 +156,7 @@
   "node:📺 Youtube/chatgpt": "blocked",
   "node:📺 Youtube/claude": "blocked",
   "node:📺 Youtube/youtube": "ok",
-  "node:📺 Youtube/instagram": "ok",
+  "node:📺 Youtube/instagram": "down",
   "node:📺 Youtube/facebook": "ok",
   "node:📺 Youtube/tiktok": "ok",
   "node:📺 Youtube/x": "ok",
@@ -167,18 +167,18 @@
   "node:📺 Youtube/twitch": "ok",
   "node:📺 Youtube/github": "ok",
   "node:🇷🇺 ☑️ Россия": "blocked",
-  "node:🇷🇺 ☑️ Россия/gemini": "down",
+  "node:🇷🇺 ☑️ Россия/gemini": "ok",
   "node:🇷🇺 ☑️ Россия/chatgpt": "blocked",
   "node:🇷🇺 ☑️ Россия/claude": "blocked",
   "node:🇷🇺 ☑️ Россия/youtube": "ok",
   "node:🇷🇺 ☑️ Россия/instagram": "ok",
-  "node:🇷🇺 ☑️ Россия/facebook": "down",
+  "node:🇷🇺 ☑️ Россия/facebook": "ok",
   "node:🇷🇺 ☑️ Россия/tiktok": "ok",
   "node:🇷🇺 ☑️ Россия/x": "ok",
   "node:🇷🇺 ☑️ Россия/discord": "ok",
   "node:🇷🇺 ☑️ Россия/telegram": "ok",
-  "node:🇷🇺 ☑️ Россия/netflix": "down",
-  "node:🇷🇺 ☑️ Россия/spotify": "down",
+  "node:🇷🇺 ☑️ Россия/netflix": "blocked",
+  "node:🇷🇺 ☑️ Россия/spotify": "ok",
   "node:🇷🇺 ☑️ Россия/twitch": "ok",
   "node:🇷🇺 ☑️ Россия/github": "ok",
   "node:🇰🇿 ☑️ Казахстан": "ok",
@@ -247,14 +247,14 @@
   "node: 🇫🇷 ☑️ Франция/claude": "down",
   "node: 🇫🇷 ☑️ Франция/youtube": "ok",
   "node: 🇫🇷 ☑️ Франция/instagram": "ok",
-  "node: 🇫🇷 ☑️ Франция/facebook": "ok",
+  "node: 🇫🇷 ☑️ Франция/facebook": "down",
   "node: 🇫🇷 ☑️ Франция/tiktok": "ok",
   "node: 🇫🇷 ☑️ Франция/x": "ok",
-  "node: 🇫🇷 ☑️ Франция/discord": "ok",
+  "node: 🇫🇷 ☑️ Франция/discord": "down",
   "node: 🇫🇷 ☑️ Франция/telegram": "ok",
   "node: 🇫🇷 ☑️ Франция/netflix": "down",
   "node: 🇫🇷 ☑️ Франция/spotify": "ok",
-  "node: 🇫🇷 ☑️ Франция/twitch": "ok",
+  "node: 🇫🇷 ☑️ Франция/twitch": "down",
   "node: 🇫🇷 ☑️ Франция/github": "ok",
   "node:🇩🇪 ☑️ Германия": "ok",
   "node:🇩🇪 ☑️ Германия/gemini": "ok",
@@ -423,7 +423,7 @@
   "node:🔵 Svoboda-Auto ^~2~^/github": "ok",
   "node:подписка целиком": "down"
  },
- "updated_at": "2026-09-24T07:04:13.980348+03:00",
+ "updated_at": "2026-09-24T17:05:12.492317+03:00",
  "replaced": {
   "185.13.225.69": "2026-09-15T22:32:40.517956+03:00",
   "93.88.158.121": "2026-09-19T21:52:16.216027+03:00"
@@ -482,17 +482,17 @@
   "93.88.158.121": "не отвечал"
  },
  "pending": {
-  "node:📺 Youtube/instagram": "down",
-  "node:🇷🇺 ☑️ Россия/facebook": "ok",
-  "node:🇷🇺 ☑️ Россия/netflix": "blocked",
-  "node:🇷🇺 ☑️ Россия/spotify": "ok",
-  "node:🇷🇺 ☑️ Россия/github": "down",
-  "node: 🇫🇷 ☑️ Франция/chatgpt": "degraded",
-  "node: 🇫🇷 ☑️ Франция/instagram": "down",
-  "node: 🇫🇷 ☑️ Франция/telegram": "down",
-  "node: 🇫🇷 ☑️ Франция/github": "down",
-  "proxy:45.10.156.204": "ok",
-  "proxy:45.10.156.204/instagram": "ok"
+  "node:🔵 Svoboda-MAX: Yota, T-моб, Билайн": "degraded",
+  "node:🔵 Svoboda-MAX: Yota, T-моб, Билайн/telegram": "down",
+  "node:🔵 Svoboda-MAX: Yota, T-моб, Билайн/netflix": "down",
+  "node:🔵 Svoboda-MAX: Yota, T-моб, Билайн/spotify": "down",
+  "node:🔵 Svoboda-MAX: Yota, T-моб, Билайн/twitch": "down",
+  "node:🔵 Svoboda-MAX: Yota, T-моб, Билайн/github": "down",
+  "node:🇷🇺 ☑️ Россия/gemini": "down",
+  "node:🇷🇺 ☑️ Россия/netflix": "down",
+  "node:🇷🇺 ☑️ Россия/twitch": "down",
+  "node: 🇫🇷 ☑️ Франция": "down",
+  "node: 🇫🇷 ☑️ Франция/gemini": "down"
  },
  "last_report": [
   [
@@ -503,7 +503,7 @@
  "last_alert": [
   [
    "-1003950923221",
-   427
+   433
   ]
  ]
 }
