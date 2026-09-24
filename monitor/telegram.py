@@ -1,7 +1,3 @@
-"""Клиент Bot API: отправка, удаление, файлы, получение команд."""
-
-from __future__ import annotations
-
 import json
 import re
 import urllib.parse
@@ -10,114 +6,115 @@ import uuid
 
 from . import log
 
-LIMIT = 3900   # у Telegram 4096, оставляем запас на разметку
+LIMIT = 3900  # у телеги 4096, запас под теги
 
 
 class Telegram:
-    def __init__(self, token: str, chats: list[str]) -> None:
+    def __init__(self, token, chats):
         self.url = f"https://api.telegram.org/bot{token}"
         self.chats = chats
 
-    def call(self, method: str, **params) -> dict:
+    def call(self, method, **params):
         data = urllib.parse.urlencode({k: v for k, v in params.items() if v is not None})
-        # На длинном опросе Telegram сам держит соединение timeout секунд.
-        wait = int(params.get("timeout") or 0) + 20
-        with urllib.request.urlopen(f"{self.url}/{method}", data.encode(), timeout=wait) as resp:
-            return json.loads(resp.read())
+        timeout = int(params.get("timeout") or 0) + 20  # long polling держит соединение
+        with urllib.request.urlopen(f"{self.url}/{method}", data.encode(), timeout=timeout) as r:
+            return json.loads(r.read())
 
-    def updates(self, offset: int, wait: int) -> list[dict]:
-        return self.call("getUpdates", offset=offset, timeout=wait,
-                         allowed_updates='["message"]')["result"]
+    def updates(self, offset, wait):
+        res = self.call("getUpdates", offset=offset, timeout=wait, allowed_updates='["message"]')
+        return res["result"]
 
-    def send(self, text: str, chat: str | None = None,
-             reply_to: int | None = None) -> list[tuple[str, int]]:
-        """Отправляет (длинное — частями). Возвращает (чат, id) отправленного."""
+    def send(self, text, chat=None, reply_to=None):
+        # возвращает [(chat, message_id)], чтобы потом можно было удалить
         sent = []
         for chat_id in [chat] if chat else self.chats:
             for i, part in enumerate(split(text)):
-                message = self._send_part(chat_id, part, reply_to if i == 0 else None)
-                if message:
-                    sent.append((chat_id, message))
+                msg_id = self.send_part(chat_id, part, reply_to if i == 0 else None)
+                if msg_id:
+                    sent.append((chat_id, msg_id))
         return sent
 
-    def delete(self, messages: list) -> None:
-        for chat, message_id in messages:
-            try:
-                self.call("deleteMessage", chat_id=chat, message_id=message_id)
-            except (OSError, ValueError) as exc:
-                # Сообщения старше 48 часов бот удалить уже не может.
-                log(f"сообщение {message_id} не удалено: {_reason(exc)}")
-
-    def send_file(self, name: str, content: str, caption: str, chat: str) -> None:
-        boundary = uuid.uuid4().hex
-        fields = {"chat_id": chat, "caption": caption}
-        parts = [f'--{boundary}\r\nContent-Disposition: form-data; name="{key}"\r\n\r\n{value}\r\n'
-                 for key, value in fields.items()]
-        parts.append(f'--{boundary}\r\nContent-Disposition: form-data; name="document"; '
-                     f'filename="{name}"\r\nContent-Type: text/plain; charset=utf-8\r\n\r\n'
-                     f'{content}\r\n--{boundary}--\r\n')
-        request = urllib.request.Request(
-            f"{self.url}/sendDocument", "".join(parts).encode(),
-            {"Content-Type": f"multipart/form-data; boundary={boundary}"})
-        try:
-            urllib.request.urlopen(request, timeout=40).close()
-        except OSError as exc:
-            log(f"файл {name} не отправлен: {_reason(exc)}")
-
-    def _send_part(self, chat: str, text: str, reply_to: int | None) -> int | None:
+    def send_part(self, chat, text, reply_to):
         params = {"chat_id": chat, "text": text, "parse_mode": "HTML",
                   "disable_web_page_preview": "true"}
-        # Команду могли успеть удалить — тогда отвечаем обычным сообщением.
+        # если команду уже удалили, reply не пройдёт - тогда шлём без него
         for reply in (reply_to, None) if reply_to else (None,):
             try:
-                answer = self.call("sendMessage", **params, reply_to_message_id=reply)
-                return answer["result"]["message_id"]
-            except (OSError, ValueError, KeyError) as exc:
-                log(f"не отправлено в {chat}: {_reason(exc)}")
+                res = self.call("sendMessage", **params, reply_to_message_id=reply)
+                return res["result"]["message_id"]
+            except (OSError, ValueError, KeyError) as e:
+                log(f"не отправилось в {chat}: {error_text(e)}")
         return None
 
+    def delete(self, messages):
+        for chat, msg_id in messages:
+            try:
+                self.call("deleteMessage", chat_id=chat, message_id=msg_id)
+            except (OSError, ValueError) as e:
+                # старше 48 часов бот удалить не может
+                log(f"не удалилось сообщение {msg_id}: {error_text(e)}")
 
-def split(text: str, limit: int = LIMIT) -> list[str]:
-    """Режет длинный текст по абзацам, не разрывая раскрывающиеся цитаты:
-    разрыв внутри <blockquote> ломает разметку, и Telegram не примет сообщение."""
+    def send_file(self, name, content, caption, chat):
+        boundary = uuid.uuid4().hex
+        body = ""
+        for key, value in (("chat_id", chat), ("caption", caption)):
+            body += f'--{boundary}\r\nContent-Disposition: form-data; name="{key}"\r\n\r\n'
+            body += f"{value}\r\n"
+        body += (f'--{boundary}\r\nContent-Disposition: form-data; name="document"; '
+                 f'filename="{name}"\r\nContent-Type: text/plain; charset=utf-8\r\n\r\n'
+                 f'{content}\r\n--{boundary}--\r\n')
+        req = urllib.request.Request(f"{self.url}/sendDocument", body.encode(),
+                                     {"Content-Type": f"multipart/form-data; boundary={boundary}"})
+        try:
+            urllib.request.urlopen(req, timeout=40).close()
+        except OSError as e:
+            log(f"файл {name} не отправился: {error_text(e)}")
+
+
+def split(text, limit=LIMIT):
+    # режем по абзацам. blockquote резать посередине нельзя - телега не примет
+    # сообщение с битой разметкой, поэтому длинную цитату делим на несколько цитат
     if len(text) <= limit:
         return [text]
 
-    units = []
-    for block in re.split(r"(<blockquote[^>]*>[\s\S]*?</blockquote>)", text):
-        quote = re.fullmatch(r"(<blockquote[^>]*>)([\s\S]*)</blockquote>", block)
-        if quote:
-            units += _by_lines(quote[2], limit, quote[1], "</blockquote>")
-        else:
-            for paragraph in block.split("\n\n"):
-                if paragraph.strip():
-                    units += _by_lines(paragraph, limit)
+    blocks = []
+    for chunk in re.split(r"(<blockquote[^>]*>[\s\S]*?</blockquote>)", text):
+        m = re.fullmatch(r"(<blockquote[^>]*>)([\s\S]*)</blockquote>", chunk)
+        if m:
+            blocks += split_lines(m.group(2), limit, m.group(1), "</blockquote>")
+            continue
+        for para in chunk.split("\n\n"):
+            if para.strip():
+                blocks += split_lines(para, limit)
 
-    parts, current = [], ""
-    for unit in units:
-        if current and len(current) + len(unit) + 2 > limit:
-            parts.append(current)
-            current = ""
-        current = f"{current}\n\n{unit}" if current else unit
-    return parts + [current] if current else parts
+    parts = []
+    cur = ""
+    for b in blocks:
+        if cur and len(cur) + len(b) + 2 > limit:
+            parts.append(cur)
+            cur = ""
+        cur = cur + "\n\n" + b if cur else b
+    if cur:
+        parts.append(cur)
+    return parts
 
 
-def _by_lines(text: str, limit: int, opening: str = "", closing: str = "") -> list[str]:
-    """Кусок длиннее лимита — делим по строкам, каждую часть оборачивая заново."""
-    room = limit - len(opening) - len(closing)
-    pieces, current = [], ""
+def split_lines(text, limit, start="", end=""):
+    room = limit - len(start) - len(end)
+    pieces = []
+    cur = ""
     for line in text.strip().split("\n"):
-        if current and len(current) + len(line) + 1 > room:
-            pieces.append(current)
-            current = ""
-        current = f"{current}\n{line}" if current else line
-    pieces.append(current)
-    return [opening + piece + closing for piece in pieces]
+        if cur and len(cur) + len(line) + 1 > room:
+            pieces.append(cur)
+            cur = ""
+        cur = cur + "\n" + line if cur else line
+    pieces.append(cur)
+    return [start + p + end for p in pieces]
 
 
-def _reason(exc: Exception) -> str:
-    """У ошибок Bot API объяснение лежит в теле ответа."""
+def error_text(e):
+    # у ошибок bot api описание приходит в теле ответа
     try:
-        return json.loads(exc.read())["description"]
+        return json.loads(e.read())["description"]
     except (AttributeError, ValueError, KeyError):
-        return str(exc)
+        return str(e)

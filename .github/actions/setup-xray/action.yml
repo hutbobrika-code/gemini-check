@@ -1,5 +1,5 @@
-name: Xray
-description: Ставит свежий Xray с geo-файлами в bin/
+name: setup xray
+description: скачивает xray и geo файлы в bin/
 runs:
   using: composite
   steps:

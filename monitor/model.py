@@ -1,7 +1,3 @@
-"""Точка проверки и результат по отдельной площадке."""
-
-from __future__ import annotations
-
 from dataclasses import dataclass, field, replace
 
 OK, BLOCKED, DOWN, DEGRADED = "ok", "blocked", "down", "degraded"
@@ -21,18 +17,17 @@ class Result:
 
 @dataclass
 class Point:
-    """Узел подписки или прокси — то, через что идут пробы."""
-
-    kind: str                  # "node" или "proxy"
+    kind: str  # node или proxy
     name: str
     status: str = DOWN
-    note: str = ""             # беда с самим каналом: хост молчит, туннель не встал
+    note: str = ""  # проблема с самим каналом: хост не отвечает, туннель не поднялся
     country: str = ""
     exit_ip: str = ""
     latency: float = 0.0
-    services: dict[str, Result] = field(default_factory=dict)
+    services: dict = field(default_factory=dict)
 
-    ps_id: int | None = None   # дальше — только у прокси
+    # только у прокси
+    ps_id: int | None = None
     login: str = ""
     password: str = ""
     http_port: int = 0
@@ -41,21 +36,20 @@ class Point:
     auto_renew: bool = False
 
     @property
-    def key(self) -> str:
+    def key(self):
         return f"{self.kind}:{self.name}"
 
     @property
-    def captcha(self) -> bool:
+    def captcha(self):
         return any(r.note == CAPTCHA for r in self.services.values())
 
-    def as_of(self, statuses: dict[str, str]) -> Point:
-        """Копия, где статусы взяты из снимка, а не из последней проверки."""
+    def as_of(self, statuses):
         services = {sid: replace(r, status=statuses.get(f"{self.key}/{sid}", r.status))
                     for sid, r in self.services.items()}
         return replace(self, status=statuses.get(self.key, self.status), services=services)
 
 
-def overall(services: dict[str, Result]) -> str:
+def overall(services):
     statuses = {r.status for r in services.values()}
     if statuses <= {OK}:
         return OK
