@@ -1,5 +1,4 @@
 {
- "last_digest": "2026-09-10-22",
  "statuses": {
   "node:⚪️ Svoboda-Auto": "ok",
   "node:⚪️ Svoboda-Auto/gemini": "ok",
@@ -179,7 +178,7 @@
   "node:🇷🇺 ☑️ Россия/telegram": "ok",
   "node:🇷🇺 ☑️ Россия/netflix": "blocked",
   "node:🇷🇺 ☑️ Россия/spotify": "ok",
-  "node:🇷🇺 ☑️ Россия/twitch": "ok",
+  "node:🇷🇺 ☑️ Россия/twitch": "down",
   "node:🇷🇺 ☑️ Россия/github": "ok",
   "node:🇰🇿 ☑️ Казахстан": "ok",
   "node:🇰🇿 ☑️ Казахстан/gemini": "ok",
@@ -423,10 +422,31 @@
   "node:🔵 Svoboda-Auto ^~2~^/github": "ok",
   "node:подписка целиком": "down"
  },
- "updated_at": "2026-09-24T17:05:12.492317+03:00",
+ "pending": {
+  "node: 🇫🇷 ☑️ Франция/gemini": "down",
+  "node:⚪️ Svoboda: Экспериментальный/youtube": "down",
+  "node:🇳🇱 Нидерланды 10Gb/s🔥": "down",
+  "node:🇳🇱 Нидерланды - 2  10Gb/s🔥": "down",
+  "node:📺 Youtube/x": "down",
+  "node:🇷🇺 ☑️ Россия/netflix": "down",
+  "node: 🇫🇷 ☑️ Франция/claude": "ok",
+  "node: 🇫🇷 ☑️ Франция/facebook": "ok",
+  "node: 🇫🇷 ☑️ Франция/netflix": "ok",
+  "node: 🇫🇷 ☑️ Франция/twitch": "ok"
+ },
+ "last_alert": [
+  [
+   "-1003950923221",
+   439
+  ]
+ ],
  "replaced": {
   "185.13.225.69": "2026-09-15T22:32:40.517956+03:00",
   "93.88.158.121": "2026-09-19T21:52:16.216027+03:00"
+ },
+ "replace_reason": {
+  "185.13.225.69": "не отвечал",
+  "93.88.158.121": "не отвечал"
  },
  "ips": {
   "39685878": "72.56.155.173",
@@ -477,32 +497,5 @@
    "reason": "не отвечал"
   }
  ],
- "replace_reason": {
-  "185.13.225.69": "не отвечал",
-  "93.88.158.121": "не отвечал"
- },
- "pending": {
-  "node:🔵 Svoboda-Auto": "degraded",
-  "node:🔵 Svoboda-Auto/youtube": "down",
-  "node:🇷🇺 ☑️ Россия/gemini": "ok",
-  "node:🇷🇺 ☑️ Россия/youtube": "ok",
-  "node:🇷🇺 ☑️ Россия/facebook": "down",
-  "node:🇷🇺 ☑️ Россия/x": "down",
-  "node:🇷🇺 ☑️ Россия/spotify": "down",
-  "node:🇷🇺 ☑️ Россия/twitch": "down",
-  "node: 🇫🇷 ☑️ Франция/gemini": "ok",
-  "node: 🇫🇷 ☑️ Франция/x": "down"
- },
- "last_report": [
-  [
-   "-1003950923221",
-   280
-  ]
- ],
- "last_alert": [
-  [
-   "-1003950923221",
-   438
-  ]
- ]
+ "updated_at": "2026-09-24T21:24:11.445535+03:00"
 }
