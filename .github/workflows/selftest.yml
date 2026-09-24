@@ -1,10 +1,12 @@
-name: Самопроверка без отправки
+name: Самопроверка
 
-# Ручной прогон полной проверки с выводом отчёта в лог — чтобы посмотреть
-# картину из раннера, ничего не отправляя в Telegram.
+# Тесты — на каждый пуш кода. Вручную ещё и полная проверка с отчётом в лог,
+# без Telegram и без записи состояния.
 
 on:
   workflow_dispatch:
+  push:
+    paths: ["**.py", "services.json"]
 
 jobs:
   selftest:
@@ -12,20 +14,15 @@ jobs:
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-xray
 
-      - name: Поставить Xray
-        run: |
-          curl -sL -o xray.zip \
-            https://github.com/XTLS/Xray-core/releases/latest/download/Xray-linux-64.zip
-          mkdir -p bin
-          unzip -o -q xray.zip xray geoip.dat geosite.dat -d bin
-          chmod +x bin/xray
+      - name: Тесты
+        run: python3 -m unittest -v
 
       - name: Проверка
+        if: github.event_name == 'workflow_dispatch'
         env:
           SUB_URL: ${{ secrets.SUB_URL }}
-          PROXIES: ${{ secrets.PROXIES }}
           PS_API_KEY: ${{ secrets.PS_API_KEY }}
-          CHECK_NODES: ${{ secrets.SUB_URL != '' && '1' || '0' }}
-          STATE_FILE: /tmp/selftest-state.json
-        run: python3 check.py --force --no-send
+          PROXIES: ${{ secrets.PROXIES }}
+        run: python3 bot.py --once

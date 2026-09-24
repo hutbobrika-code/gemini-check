@@ -1,0 +1,12 @@
+name: Xray
+description: Ставит свежий Xray с geo-файлами в bin/
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      run: |
+        curl -sSL -o "$RUNNER_TEMP/xray.zip" \
+          https://github.com/XTLS/Xray-core/releases/latest/download/Xray-linux-64.zip
+        mkdir -p bin
+        unzip -o -q "$RUNNER_TEMP/xray.zip" xray geoip.dat geosite.dat -d bin
+        bin/xray version | head -1

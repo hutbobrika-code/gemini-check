@@ -1,177 +1,56 @@
 [
- {
-  "id": "chatgpt",
-  "name": "ChatGPT",
-  "api": {
-   "url": "https://api.openai.com/v1/models",
-   "ok": [
-    401
-   ],
-   "blocked_codes": [
-    403
-   ],
-   "blocked_markers": [
-    "unsupported_country",
-    "not supported"
-   ]
+  {
+    "id": "chatgpt",
+    "name": "ChatGPT",
+    "api": {
+      "url": "https://api.openai.com/v1/models",
+      "ok": [401],
+      "blocked_codes": [403],
+      "blocked_markers": ["unsupported_country", "not supported"]
+    },
+    "web": {"url": "https://chatgpt.com/"}
   },
-  "web": {
-   "url": "https://chatgpt.com/",
-   "ok": [
-    200
-   ]
-  }
- },
- {
-  "id": "claude",
-  "name": "Claude",
-  "api": {
-   "url": "https://api.anthropic.com/v1/models",
-   "headers": [
-    "anthropic-version: 2023-06-01"
-   ],
-   "ok": [
-    401
-   ],
-   "blocked_codes": [
-    403
-   ],
-   "blocked_markers": [
-    "not allowed",
-    "unsupported",
-    "not available"
-   ]
+  {
+    "id": "claude",
+    "name": "Claude",
+    "api": {
+      "url": "https://api.anthropic.com/v1/models",
+      "headers": ["anthropic-version: 2023-06-01"],
+      "ok": [401],
+      "blocked_codes": [403],
+      "blocked_markers": ["not allowed", "unsupported", "not available"]
+    },
+    "web": {"url": "https://claude.ai/"}
   },
-  "web": {
-   "url": "https://claude.ai/",
-   "ok": [
-    200
-   ]
-  }
- },
- {
-  "id": "youtube",
-  "name": "YouTube",
-  "web": {
-   "url": "https://www.youtube.com/",
-   "ok": [
-    200
-   ]
-  }
- },
- {
-  "id": "instagram",
-  "name": "Instagram",
-  "web": {
-   "url": "https://www.instagram.com/",
-   "ok": [
-    200
-   ]
-  }
- },
- {
-  "id": "facebook",
-  "name": "Facebook",
-  "web": {
-   "url": "https://www.facebook.com/",
-   "ok": [
-    200
-   ],
-   "headers": [
-    "User-Agent: curl/8.0"
-   ]
-  }
- },
- {
-  "id": "tiktok",
-  "name": "TikTok",
-  "web": {
-   "url": "https://www.tiktok.com/",
-   "ok": [
-    200
-   ]
-  }
- },
- {
-  "id": "x",
-  "name": "X",
-  "web": {
-   "url": "https://x.com/",
-   "ok": [
-    200
-   ]
-  }
- },
- {
-  "id": "discord",
-  "name": "Discord",
-  "web": {
-   "url": "https://discord.com/api/v9/gateway",
-   "ok": [
-    200
-   ]
-  }
- },
- {
-  "id": "telegram",
-  "name": "Telegram",
-  "web": {
-   "url": "https://web.telegram.org/",
-   "ok": [
-    200
-   ]
-  }
- },
- {
-  "id": "netflix",
-  "name": "Netflix",
-  "web": {
-   "url": "https://www.netflix.com/title/80018499",
-   "ok": [
-    200
-   ],
-   "blocked_codes": [
-    403,
-    451
-   ],
-   "blocked_markers": [
-    "not available in your country",
-    "hasn't come to this part of the world",
-    "isn't available in your country"
-   ]
-  }
- },
- {
-  "id": "spotify",
-  "name": "Spotify",
-  "web": {
-   "url": "https://open.spotify.com/",
-   "ok": [
-    200
-   ],
-   "blocked_codes": [
-    403
-   ]
-  }
- },
- {
-  "id": "twitch",
-  "name": "Twitch",
-  "web": {
-   "url": "https://www.twitch.tv/",
-   "ok": [
-    200
-   ]
-  }
- },
- {
-  "id": "github",
-  "name": "GitHub",
-  "web": {
-   "url": "https://github.com/",
-   "ok": [
-    200
-   ]
-  }
- }
+  {"id": "youtube", "name": "YouTube", "web": {"url": "https://www.youtube.com/"}},
+  {"id": "instagram", "name": "Instagram", "web": {"url": "https://www.instagram.com/"}},
+  {
+    "id": "facebook",
+    "name": "Facebook",
+    "web": {"url": "https://www.facebook.com/", "headers": ["User-Agent: curl/8.0"]}
+  },
+  {"id": "tiktok", "name": "TikTok", "web": {"url": "https://www.tiktok.com/"}},
+  {"id": "x", "name": "X", "web": {"url": "https://x.com/"}},
+  {"id": "discord", "name": "Discord", "web": {"url": "https://discord.com/api/v9/gateway"}},
+  {"id": "telegram", "name": "Telegram", "web": {"url": "https://web.telegram.org/"}},
+  {
+    "id": "netflix",
+    "name": "Netflix",
+    "web": {
+      "url": "https://www.netflix.com/title/80018499",
+      "blocked_codes": [403, 451],
+      "blocked_markers": [
+        "not available in your country",
+        "isn't available in your country",
+        "hasn't come to this part of the world"
+      ]
+    }
+  },
+  {
+    "id": "spotify",
+    "name": "Spotify",
+    "web": {"url": "https://open.spotify.com/", "blocked_codes": [403]}
+  },
+  {"id": "twitch", "name": "Twitch", "web": {"url": "https://www.twitch.tv/"}},
+  {"id": "github", "name": "GitHub", "web": {"url": "https://github.com/"}}
 ]
