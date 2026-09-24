@@ -482,17 +482,16 @@
   "93.88.158.121": "не отвечал"
  },
  "pending": {
-  "node:🔵 Svoboda-MAX: Yota, T-моб, Билайн": "degraded",
-  "node:🔵 Svoboda-MAX: Yota, T-моб, Билайн/telegram": "down",
-  "node:🔵 Svoboda-MAX: Yota, T-моб, Билайн/netflix": "down",
-  "node:🔵 Svoboda-MAX: Yota, T-моб, Билайн/spotify": "down",
-  "node:🔵 Svoboda-MAX: Yota, T-моб, Билайн/twitch": "down",
-  "node:🔵 Svoboda-MAX: Yota, T-моб, Билайн/github": "down",
-  "node:🇷🇺 ☑️ Россия/gemini": "down",
-  "node:🇷🇺 ☑️ Россия/netflix": "down",
+  "node:🔵 Svoboda-Auto": "degraded",
+  "node:🔵 Svoboda-Auto/youtube": "down",
+  "node:🇷🇺 ☑️ Россия/gemini": "ok",
+  "node:🇷🇺 ☑️ Россия/youtube": "ok",
+  "node:🇷🇺 ☑️ Россия/facebook": "down",
+  "node:🇷🇺 ☑️ Россия/x": "down",
+  "node:🇷🇺 ☑️ Россия/spotify": "down",
   "node:🇷🇺 ☑️ Россия/twitch": "down",
-  "node: 🇫🇷 ☑️ Франция": "down",
-  "node: 🇫🇷 ☑️ Франция/gemini": "down"
+  "node: 🇫🇷 ☑️ Франция/gemini": "ok",
+  "node: 🇫🇷 ☑️ Франция/x": "down"
  },
  "last_report": [
   [
@@ -503,7 +502,7 @@
  "last_alert": [
   [
    "-1003950923221",
-   433
+   438
   ]
  ]
 }
