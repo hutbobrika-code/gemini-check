@@ -169,16 +169,16 @@
   "node:🇷🇺 ☑️ Россия/gemini": "ok",
   "node:🇷🇺 ☑️ Россия/chatgpt": "blocked",
   "node:🇷🇺 ☑️ Россия/claude": "blocked",
-  "node:🇷🇺 ☑️ Россия/youtube": "ok",
+  "node:🇷🇺 ☑️ Россия/youtube": "down",
   "node:🇷🇺 ☑️ Россия/instagram": "ok",
   "node:🇷🇺 ☑️ Россия/facebook": "ok",
   "node:🇷🇺 ☑️ Россия/tiktok": "ok",
   "node:🇷🇺 ☑️ Россия/x": "ok",
-  "node:🇷🇺 ☑️ Россия/discord": "down",
-  "node:🇷🇺 ☑️ Россия/telegram": "down",
-  "node:🇷🇺 ☑️ Россия/netflix": "down",
+  "node:🇷🇺 ☑️ Россия/discord": "ok",
+  "node:🇷🇺 ☑️ Россия/telegram": "ok",
+  "node:🇷🇺 ☑️ Россия/netflix": "blocked",
   "node:🇷🇺 ☑️ Россия/spotify": "ok",
-  "node:🇷🇺 ☑️ Россия/twitch": "down",
+  "node:🇷🇺 ☑️ Россия/twitch": "ok",
   "node:🇷🇺 ☑️ Россия/github": "ok",
   "node:🇰🇿 ☑️ Казахстан": "ok",
   "node:🇰🇿 ☑️ Казахстан/gemini": "ok",
@@ -242,16 +242,16 @@
   "node:🇭🇰 ☑️ Гонконг/github": "ok",
   "node: 🇫🇷 ☑️ Франция": "degraded",
   "node: 🇫🇷 ☑️ Франция/gemini": "degraded",
-  "node: 🇫🇷 ☑️ Франция/chatgpt": "ok",
-  "node: 🇫🇷 ☑️ Франция/claude": "ok",
+  "node: 🇫🇷 ☑️ Франция/chatgpt": "degraded",
+  "node: 🇫🇷 ☑️ Франция/claude": "degraded",
   "node: 🇫🇷 ☑️ Франция/youtube": "ok",
   "node: 🇫🇷 ☑️ Франция/instagram": "ok",
   "node: 🇫🇷 ☑️ Франция/facebook": "ok",
   "node: 🇫🇷 ☑️ Франция/tiktok": "ok",
-  "node: 🇫🇷 ☑️ Франция/x": "ok",
+  "node: 🇫🇷 ☑️ Франция/x": "down",
   "node: 🇫🇷 ☑️ Франция/discord": "ok",
   "node: 🇫🇷 ☑️ Франция/telegram": "ok",
-  "node: 🇫🇷 ☑️ Франция/netflix": "ok",
+  "node: 🇫🇷 ☑️ Франция/netflix": "down",
   "node: 🇫🇷 ☑️ Франция/spotify": "down",
   "node: 🇫🇷 ☑️ Франция/twitch": "ok",
   "node: 🇫🇷 ☑️ Франция/github": "ok",
@@ -423,21 +423,15 @@
   "node:подписка целиком": "down"
  },
  "pending": {
-  "node:🇷🇺 ☑️ Россия/gemini": "down",
-  "node:🇷🇺 ☑️ Россия/instagram": "down",
-  "node:🇷🇺 ☑️ Россия/discord": "ok",
-  "node:🇷🇺 ☑️ Россия/telegram": "ok",
-  "node: 🇫🇷 ☑️ Франция/claude": "degraded",
-  "node: 🇫🇷 ☑️ Франция/instagram": "down",
-  "node: 🇫🇷 ☑️ Франция/tiktok": "down",
-  "node: 🇫🇷 ☑️ Франция/telegram": "down",
-  "node: 🇫🇷 ☑️ Франция/twitch": "down",
-  "node: 🇫🇷 ☑️ Франция/github": "down"
+  "node:🇷🇺 ☑️ Россия/youtube": "ok",
+  "node:🇷🇺 ☑️ Россия/netflix": "down",
+  "node: 🇫🇷 ☑️ Франция": "down",
+  "node: 🇫🇷 ☑️ Франция/gemini": "down"
  },
  "last_alert": [
   [
    "-1003950923221",
-   455
+   461
   ]
  ],
  "replaced": {
@@ -497,5 +491,5 @@
    "reason": "не отвечал"
   }
  ],
- "updated_at": "2026-09-25T13:07:36.341101+03:00"
+ "updated_at": "2026-09-25T18:08:09.867047+03:00"
 }
