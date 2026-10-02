@@ -156,7 +156,7 @@
   "node:📺 Youtube/claude": "blocked",
   "node:📺 Youtube/youtube": "ok",
   "node:📺 Youtube/instagram": "down",
-  "node:📺 Youtube/facebook": "down",
+  "node:📺 Youtube/facebook": "ok",
   "node:📺 Youtube/tiktok": "ok",
   "node:📺 Youtube/x": "ok",
   "node:📺 Youtube/discord": "ok",
@@ -424,25 +424,16 @@
   "node:подписка": "down"
  },
  "pending": {
-  "node:⚪️ Svoboda: Экспериментальный 2": "degraded",
-  "node:⚪️ Svoboda: Экспериментальный 2/gemini": "down",
-  "node:🇵🇱  ☑️ Польша ": "down",
-  "node:🇵🇱  ☑️ Польша /gemini": "down",
-  "node:🇷🇺 ☑️ Россия/facebook": "down",
-  "node:🇰🇿 ☑️ Казахстан": "degraded",
-  "node:🇰🇿 ☑️ Казахстан/gemini": "down",
-  "node:🇮🇳 ☑️ Индия": "degraded",
-  "node:🇮🇳 ☑️ Индия/gemini": "down",
-  "node:🇭🇰 ☑️ Гонконг/gemini": "down",
-  "node: 🇫🇷 ☑️ Франция": "degraded",
-  "node: 🇫🇷 ☑️ Франция/gemini": "down",
-  "node:🇩🇪 ☑️ Германия": "degraded",
-  "node:🇩🇪 ☑️ Германия/gemini": "down"
+  "node:📺 Youtube/x": "down",
+  "node:📺 Youtube/discord": "down",
+  "node:🇭🇰 ☑️ Гонконг/spotify": "degraded",
+  "proxy:82.23.165.157": "degraded",
+  "proxy:82.23.165.157/instagram": "degraded"
  },
  "last_alert": [
   [
    "-1003950923221",
-   619
+   620
   ]
  ],
  "replaced": {
@@ -508,5 +499,5 @@
    "reason": "не отвечал"
   }
  ],
- "updated_at": "2026-10-02T05:32:13.006405+03:00"
+ "updated_at": "2026-10-02T10:32:30.342417+03:00"
 }
