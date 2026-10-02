@@ -45,8 +45,8 @@
   "node:⚪️ Svoboda: Экспериментальный/spotify": "ok",
   "node:⚪️ Svoboda: Экспериментальный/twitch": "ok",
   "node:⚪️ Svoboda: Экспериментальный/github": "ok",
-  "node:⚪️ Svoboda: Экспериментальный 2": "degraded",
-  "node:⚪️ Svoboda: Экспериментальный 2/gemini": "degraded",
+  "node:⚪️ Svoboda: Экспериментальный 2": "ok",
+  "node:⚪️ Svoboda: Экспериментальный 2/gemini": "ok",
   "node:⚪️ Svoboda: Экспериментальный 2/chatgpt": "ok",
   "node:⚪️ Svoboda: Экспериментальный 2/claude": "ok",
   "node:⚪️ Svoboda: Экспериментальный 2/youtube": "ok",
@@ -105,7 +105,7 @@
   "node:🇳🇱 Нидерланды 10Gb/s🔥/spotify": "ok",
   "node:🇳🇱 Нидерланды 10Gb/s🔥/twitch": "ok",
   "node:🇳🇱 Нидерланды 10Gb/s🔥/github": "ok",
-  "node:🇳🇱 Нидерланды - 2  10Gb/s🔥": "down",
+  "node:🇳🇱 Нидерланды - 2  10Gb/s🔥": "degraded",
   "node:🇳🇱 Нидерланды - 2  10Gb/s🔥/gemini": "down",
   "node:🇳🇱 Нидерланды - 2  10Gb/s🔥/chatgpt": "ok",
   "node:🇳🇱 Нидерланды - 2  10Gb/s🔥/claude": "ok",
@@ -156,7 +156,7 @@
   "node:📺 Youtube/claude": "blocked",
   "node:📺 Youtube/youtube": "ok",
   "node:📺 Youtube/instagram": "down",
-  "node:📺 Youtube/facebook": "ok",
+  "node:📺 Youtube/facebook": "down",
   "node:📺 Youtube/tiktok": "ok",
   "node:📺 Youtube/x": "ok",
   "node:📺 Youtube/discord": "ok",
@@ -180,8 +180,8 @@
   "node:🇷🇺 ☑️ Россия/spotify": "ok",
   "node:🇷🇺 ☑️ Россия/twitch": "ok",
   "node:🇷🇺 ☑️ Россия/github": "ok",
-  "node:🇰🇿 ☑️ Казахстан": "degraded",
-  "node:🇰🇿 ☑️ Казахстан/gemini": "degraded",
+  "node:🇰🇿 ☑️ Казахстан": "ok",
+  "node:🇰🇿 ☑️ Казахстан/gemini": "ok",
   "node:🇰🇿 ☑️ Казахстан/chatgpt": "ok",
   "node:🇰🇿 ☑️ Казахстан/claude": "ok",
   "node:🇰🇿 ☑️ Казахстан/youtube": "ok",
@@ -210,8 +210,8 @@
   "node:🇺🇸  ☑️ США/spotify": "ok",
   "node:🇺🇸  ☑️ США/twitch": "ok",
   "node:🇺🇸  ☑️ США/github": "ok",
-  "node:🇮🇳 ☑️ Индия": "degraded",
-  "node:🇮🇳 ☑️ Индия/gemini": "degraded",
+  "node:🇮🇳 ☑️ Индия": "ok",
+  "node:🇮🇳 ☑️ Индия/gemini": "ok",
   "node:🇮🇳 ☑️ Индия/chatgpt": "ok",
   "node:🇮🇳 ☑️ Индия/claude": "ok",
   "node:🇮🇳 ☑️ Индия/youtube": "ok",
@@ -226,7 +226,7 @@
   "node:🇮🇳 ☑️ Индия/twitch": "ok",
   "node:🇮🇳 ☑️ Индия/github": "ok",
   "node:🇭🇰 ☑️ Гонконг": "blocked",
-  "node:🇭🇰 ☑️ Гонконг/gemini": "degraded",
+  "node:🇭🇰 ☑️ Гонконг/gemini": "ok",
   "node:🇭🇰 ☑️ Гонконг/chatgpt": "blocked",
   "node:🇭🇰 ☑️ Гонконг/claude": "blocked",
   "node:🇭🇰 ☑️ Гонконг/youtube": "ok",
@@ -240,8 +240,8 @@
   "node:🇭🇰 ☑️ Гонконг/spotify": "blocked",
   "node:🇭🇰 ☑️ Гонконг/twitch": "ok",
   "node:🇭🇰 ☑️ Гонконг/github": "ok",
-  "node: 🇫🇷 ☑️ Франция": "degraded",
-  "node: 🇫🇷 ☑️ Франция/gemini": "degraded",
+  "node: 🇫🇷 ☑️ Франция": "ok",
+  "node: 🇫🇷 ☑️ Франция/gemini": "ok",
   "node: 🇫🇷 ☑️ Франция/chatgpt": "ok",
   "node: 🇫🇷 ☑️ Франция/claude": "ok",
   "node: 🇫🇷 ☑️ Франция/youtube": "ok",
@@ -255,8 +255,8 @@
   "node: 🇫🇷 ☑️ Франция/spotify": "ok",
   "node: 🇫🇷 ☑️ Франция/twitch": "ok",
   "node: 🇫🇷 ☑️ Франция/github": "ok",
-  "node:🇩🇪 ☑️ Германия": "degraded",
-  "node:🇩🇪 ☑️ Германия/gemini": "degraded",
+  "node:🇩🇪 ☑️ Германия": "ok",
+  "node:🇩🇪 ☑️ Германия/gemini": "ok",
   "node:🇩🇪 ☑️ Германия/chatgpt": "ok",
   "node:🇩🇪 ☑️ Германия/claude": "ok",
   "node:🇩🇪 ☑️ Германия/youtube": "ok",
@@ -424,13 +424,25 @@
   "node:подписка": "down"
  },
  "pending": {
-  "node:📺 Youtube/facebook": "down",
-  "node:📺 Youtube/x": "down"
+  "node:⚪️ Svoboda: Экспериментальный 2": "degraded",
+  "node:⚪️ Svoboda: Экспериментальный 2/gemini": "down",
+  "node:🇵🇱  ☑️ Польша ": "down",
+  "node:🇵🇱  ☑️ Польша /gemini": "down",
+  "node:🇷🇺 ☑️ Россия/facebook": "down",
+  "node:🇰🇿 ☑️ Казахстан": "degraded",
+  "node:🇰🇿 ☑️ Казахстан/gemini": "down",
+  "node:🇮🇳 ☑️ Индия": "degraded",
+  "node:🇮🇳 ☑️ Индия/gemini": "down",
+  "node:🇭🇰 ☑️ Гонконг/gemini": "down",
+  "node: 🇫🇷 ☑️ Франция": "degraded",
+  "node: 🇫🇷 ☑️ Франция/gemini": "down",
+  "node:🇩🇪 ☑️ Германия": "degraded",
+  "node:🇩🇪 ☑️ Германия/gemini": "down"
  },
  "last_alert": [
   [
    "-1003950923221",
-   615
+   619
   ]
  ],
  "replaced": {
@@ -496,5 +508,5 @@
    "reason": "не отвечал"
   }
  ],
- "updated_at": "2026-10-02T00:31:11.486131+03:00"
+ "updated_at": "2026-10-02T05:32:13.006405+03:00"
 }
