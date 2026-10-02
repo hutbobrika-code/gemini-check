@@ -158,7 +158,7 @@
   "node:📺 Youtube/instagram": "down",
   "node:📺 Youtube/facebook": "ok",
   "node:📺 Youtube/tiktok": "ok",
-  "node:📺 Youtube/x": "ok",
+  "node:📺 Youtube/x": "down",
   "node:📺 Youtube/discord": "ok",
   "node:📺 Youtube/telegram": "down",
   "node:📺 Youtube/netflix": "blocked",
@@ -237,7 +237,7 @@
   "node:🇭🇰 ☑️ Гонконг/discord": "ok",
   "node:🇭🇰 ☑️ Гонконг/telegram": "ok",
   "node:🇭🇰 ☑️ Гонконг/netflix": "ok",
-  "node:🇭🇰 ☑️ Гонконг/spotify": "blocked",
+  "node:🇭🇰 ☑️ Гонконг/spotify": "down",
   "node:🇭🇰 ☑️ Гонконг/twitch": "ok",
   "node:🇭🇰 ☑️ Гонконг/github": "ok",
   "node: 🇫🇷 ☑️ Франция": "ok",
@@ -421,19 +421,32 @@
   "node:🔵 Svoboda-Auto ^~2~^/twitch": "ok",
   "node:🔵 Svoboda-Auto ^~2~^/github": "ok",
   "node:подписка целиком": "down",
-  "node:подписка": "down"
+  "node:подписка": "down",
+  "proxy:95.134.165.249": "ok",
+  "proxy:95.134.165.249/gemini": "ok",
+  "proxy:95.134.165.249/chatgpt": "ok",
+  "proxy:95.134.165.249/claude": "ok",
+  "proxy:95.134.165.249/youtube": "ok",
+  "proxy:95.134.165.249/instagram": "ok",
+  "proxy:95.134.165.249/facebook": "ok",
+  "proxy:95.134.165.249/tiktok": "ok",
+  "proxy:95.134.165.249/x": "ok",
+  "proxy:95.134.165.249/discord": "ok",
+  "proxy:95.134.165.249/telegram": "ok",
+  "proxy:95.134.165.249/netflix": "ok",
+  "proxy:95.134.165.249/spotify": "ok",
+  "proxy:95.134.165.249/twitch": "ok",
+  "proxy:95.134.165.249/github": "ok"
  },
  "pending": {
-  "node:📺 Youtube/x": "down",
-  "node:📺 Youtube/discord": "down",
-  "node:🇭🇰 ☑️ Гонконг/spotify": "degraded",
-  "proxy:82.23.165.157": "degraded",
-  "proxy:82.23.165.157/instagram": "degraded"
+  "node:🇳🇱 Нидерланды - 2  10Gb/s🔥": "down",
+  "node:📺 Youtube/facebook": "down",
+  "node:📺 Youtube/x": "ok"
  },
  "last_alert": [
   [
    "-1003950923221",
-   620
+   624
   ]
  ],
  "replaced": {
@@ -488,7 +501,8 @@
   "40924458": "45.10.156.204",
   "40924459": "51.241.109.198",
   "40924460": "82.23.165.157",
-  "40924461": "93.88.154.91"
+  "40924461": "93.88.154.91",
+  "40979720": "95.134.165.249"
  },
  "replacement_log": [
   {
@@ -499,5 +513,5 @@
    "reason": "не отвечал"
   }
  ],
- "updated_at": "2026-10-02T10:32:30.342417+03:00"
+ "updated_at": "2026-10-02T15:32:54.210121+03:00"
 }
