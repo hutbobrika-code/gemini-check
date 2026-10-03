@@ -75,21 +75,21 @@
   "node:🔵 Svoboda-MAX: Все операторы/spotify": "ok",
   "node:🔵 Svoboda-MAX: Все операторы/twitch": "ok",
   "node:🔵 Svoboda-MAX: Все операторы/github": "ok",
-  "node:🔵 Svoboda-MAX: Yota, T-моб, Билайн": "ok",
+  "node:🔵 Svoboda-MAX: Yota, T-моб, Билайн": "degraded",
   "node:🔵 Svoboda-MAX: Yota, T-моб, Билайн/gemini": "ok",
-  "node:🔵 Svoboda-MAX: Yota, T-моб, Билайн/chatgpt": "ok",
-  "node:🔵 Svoboda-MAX: Yota, T-моб, Билайн/claude": "ok",
+  "node:🔵 Svoboda-MAX: Yota, T-моб, Билайн/chatgpt": "down",
+  "node:🔵 Svoboda-MAX: Yota, T-моб, Билайн/claude": "down",
   "node:🔵 Svoboda-MAX: Yota, T-моб, Билайн/youtube": "ok",
-  "node:🔵 Svoboda-MAX: Yota, T-моб, Билайн/instagram": "ok",
+  "node:🔵 Svoboda-MAX: Yota, T-моб, Билайн/instagram": "down",
   "node:🔵 Svoboda-MAX: Yota, T-моб, Билайн/facebook": "ok",
-  "node:🔵 Svoboda-MAX: Yota, T-моб, Билайн/tiktok": "ok",
-  "node:🔵 Svoboda-MAX: Yota, T-моб, Билайн/x": "ok",
-  "node:🔵 Svoboda-MAX: Yota, T-моб, Билайн/discord": "ok",
-  "node:🔵 Svoboda-MAX: Yota, T-моб, Билайн/telegram": "ok",
-  "node:🔵 Svoboda-MAX: Yota, T-моб, Билайн/netflix": "ok",
-  "node:🔵 Svoboda-MAX: Yota, T-моб, Билайн/spotify": "ok",
-  "node:🔵 Svoboda-MAX: Yota, T-моб, Билайн/twitch": "ok",
-  "node:🔵 Svoboda-MAX: Yota, T-моб, Билайн/github": "ok",
+  "node:🔵 Svoboda-MAX: Yota, T-моб, Билайн/tiktok": "down",
+  "node:🔵 Svoboda-MAX: Yota, T-моб, Билайн/x": "down",
+  "node:🔵 Svoboda-MAX: Yota, T-моб, Билайн/discord": "down",
+  "node:🔵 Svoboda-MAX: Yota, T-моб, Билайн/telegram": "down",
+  "node:🔵 Svoboda-MAX: Yota, T-моб, Билайн/netflix": "down",
+  "node:🔵 Svoboda-MAX: Yota, T-моб, Билайн/spotify": "down",
+  "node:🔵 Svoboda-MAX: Yota, T-моб, Билайн/twitch": "down",
+  "node:🔵 Svoboda-MAX: Yota, T-моб, Билайн/github": "down",
   "node:🇳🇱 Нидерланды 10Gb/s🔥": "ok",
   "node:🇳🇱 Нидерланды 10Gb/s🔥/gemini": "ok",
   "node:🇳🇱 Нидерланды 10Gb/s🔥/chatgpt": "ok",
@@ -156,7 +156,7 @@
   "node:📺 Youtube/claude": "blocked",
   "node:📺 Youtube/youtube": "ok",
   "node:📺 Youtube/instagram": "ok",
-  "node:📺 Youtube/facebook": "ok",
+  "node:📺 Youtube/facebook": "down",
   "node:📺 Youtube/tiktok": "ok",
   "node:📺 Youtube/x": "ok",
   "node:📺 Youtube/discord": "ok",
@@ -171,7 +171,7 @@
   "node:🇷🇺 ☑️ Россия/claude": "blocked",
   "node:🇷🇺 ☑️ Россия/youtube": "ok",
   "node:🇷🇺 ☑️ Россия/instagram": "ok",
-  "node:🇷🇺 ☑️ Россия/facebook": "down",
+  "node:🇷🇺 ☑️ Россия/facebook": "ok",
   "node:🇷🇺 ☑️ Россия/tiktok": "ok",
   "node:🇷🇺 ☑️ Россия/x": "ok",
   "node:🇷🇺 ☑️ Россия/discord": "ok",
@@ -315,12 +315,12 @@
   "proxy:104.234.196.39/spotify": "ok",
   "proxy:104.234.196.39/twitch": "ok",
   "proxy:104.234.196.39/github": "ok",
-  "proxy:45.10.156.204": "degraded",
+  "proxy:45.10.156.204": "ok",
   "proxy:45.10.156.204/gemini": "ok",
   "proxy:45.10.156.204/chatgpt": "ok",
   "proxy:45.10.156.204/claude": "ok",
   "proxy:45.10.156.204/youtube": "ok",
-  "proxy:45.10.156.204/instagram": "degraded",
+  "proxy:45.10.156.204/instagram": "ok",
   "proxy:45.10.156.204/facebook": "ok",
   "proxy:45.10.156.204/tiktok": "ok",
   "proxy:45.10.156.204/x": "ok",
@@ -499,17 +499,21 @@
   "proxy:51.241.109.250/github": "ok"
  },
  "pending": {
-  "node:📺 Youtube/instagram": "down",
-  "node:📺 Youtube/x": "down",
+  "proxy:45.10.156.204": "degraded",
+  "proxy:45.10.156.204/instagram": "degraded",
   "proxy:51.241.109.198": "degraded",
   "proxy:51.241.109.198/instagram": "degraded",
+  "proxy:82.23.165.157": "degraded",
+  "proxy:82.23.165.157/instagram": "degraded",
+  "proxy:82.23.165.215": "degraded",
+  "proxy:82.23.165.215/instagram": "degraded",
   "proxy:51.241.109.250": "degraded",
   "proxy:51.241.109.250/instagram": "degraded"
  },
  "last_alert": [
   [
    "-1003950923221",
-   642
+   647
   ]
  ],
  "replaced": {
@@ -580,5 +584,5 @@
    "reason": "не отвечал"
   }
  ],
- "updated_at": "2026-10-03T16:36:30.149129+03:00"
+ "updated_at": "2026-10-03T21:36:59.764022+03:00"
 }
