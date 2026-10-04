@@ -156,7 +156,7 @@
   "node:📺 Youtube/claude": "blocked",
   "node:📺 Youtube/youtube": "ok",
   "node:📺 Youtube/instagram": "ok",
-  "node:📺 Youtube/facebook": "ok",
+  "node:📺 Youtube/facebook": "down",
   "node:📺 Youtube/tiktok": "ok",
   "node:📺 Youtube/x": "ok",
   "node:📺 Youtube/discord": "ok",
@@ -499,15 +499,28 @@
   "proxy:51.241.109.250/github": "ok"
  },
  "pending": {
-  "node:📺 Youtube/instagram": "down",
-  "node:📺 Youtube/facebook": "down",
-  "proxy:45.10.156.204": "ok",
-  "proxy:45.10.156.204/instagram": "ok"
+  "node:⚪️ Svoboda-Auto": "degraded",
+  "node:⚪️ Svoboda-Auto/netflix": "down",
+  "node:🔵 Svoboda-MAX: Yota, T-моб, Билайн": "degraded",
+  "node:🔵 Svoboda-MAX: Yota, T-моб, Билайн/chatgpt": "down",
+  "node:🔵 Svoboda-MAX: Yota, T-моб, Билайн/claude": "down",
+  "node:🔵 Svoboda-MAX: Yota, T-моб, Билайн/instagram": "down",
+  "node:🔵 Svoboda-MAX: Yota, T-моб, Билайн/tiktok": "down",
+  "node:🔵 Svoboda-MAX: Yota, T-моб, Билайн/x": "down",
+  "node:🔵 Svoboda-MAX: Yota, T-моб, Билайн/discord": "down",
+  "node:🔵 Svoboda-MAX: Yota, T-моб, Билайн/telegram": "down",
+  "node:🔵 Svoboda-MAX: Yota, T-моб, Билайн/netflix": "down",
+  "node:🔵 Svoboda-MAX: Yota, T-моб, Билайн/spotify": "down",
+  "node:🔵 Svoboda-MAX: Yota, T-моб, Билайн/twitch": "down",
+  "node:🔵 Svoboda-MAX: Yota, T-моб, Билайн/github": "down",
+  "node:🇳🇱 Нидерланды - 2  10Gb/s🔥": "degraded",
+  "node:🇳🇱 Нидерланды - 2  10Gb/s🔥/netflix": "down",
+  "node:📺 Youtube/instagram": "down"
  },
  "last_alert": [
   [
    "-1003950923221",
-   654
+   657
   ]
  ],
  "replaced": {
@@ -578,5 +591,5 @@
    "reason": "не отвечал"
   }
  ],
- "updated_at": "2026-10-04T07:38:17.679500+03:00"
+ "updated_at": "2026-10-04T12:38:47.520039+03:00"
 }
