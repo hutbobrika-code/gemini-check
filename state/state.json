@@ -170,8 +170,8 @@
   "node:🇷🇺 ☑️ Россия/chatgpt": "blocked",
   "node:🇷🇺 ☑️ Россия/claude": "blocked",
   "node:🇷🇺 ☑️ Россия/youtube": "ok",
-  "node:🇷🇺 ☑️ Россия/instagram": "down",
-  "node:🇷🇺 ☑️ Россия/facebook": "down",
+  "node:🇷🇺 ☑️ Россия/instagram": "ok",
+  "node:🇷🇺 ☑️ Россия/facebook": "ok",
   "node:🇷🇺 ☑️ Россия/tiktok": "ok",
   "node:🇷🇺 ☑️ Россия/x": "ok",
   "node:🇷🇺 ☑️ Россия/discord": "ok",
@@ -315,12 +315,12 @@
   "proxy:104.234.196.39/spotify": "ok",
   "proxy:104.234.196.39/twitch": "ok",
   "proxy:104.234.196.39/github": "ok",
-  "proxy:45.10.156.204": "degraded",
+  "proxy:45.10.156.204": "ok",
   "proxy:45.10.156.204/gemini": "ok",
   "proxy:45.10.156.204/chatgpt": "ok",
   "proxy:45.10.156.204/claude": "ok",
   "proxy:45.10.156.204/youtube": "ok",
-  "proxy:45.10.156.204/instagram": "degraded",
+  "proxy:45.10.156.204/instagram": "ok",
   "proxy:45.10.156.204/facebook": "ok",
   "proxy:45.10.156.204/tiktok": "ok",
   "proxy:45.10.156.204/x": "ok",
@@ -499,28 +499,16 @@
   "proxy:51.241.109.250/github": "ok"
  },
  "pending": {
-  "node:⚪️ Svoboda-Auto": "degraded",
-  "node:⚪️ Svoboda-Auto/netflix": "down",
-  "node:🔵 Svoboda-MAX: Yota, T-моб, Билайн": "degraded",
-  "node:🔵 Svoboda-MAX: Yota, T-моб, Билайн/chatgpt": "down",
-  "node:🔵 Svoboda-MAX: Yota, T-моб, Билайн/claude": "down",
-  "node:🔵 Svoboda-MAX: Yota, T-моб, Билайн/instagram": "down",
-  "node:🔵 Svoboda-MAX: Yota, T-моб, Билайн/tiktok": "down",
-  "node:🔵 Svoboda-MAX: Yota, T-моб, Билайн/x": "down",
-  "node:🔵 Svoboda-MAX: Yota, T-моб, Билайн/discord": "down",
-  "node:🔵 Svoboda-MAX: Yota, T-моб, Билайн/telegram": "down",
-  "node:🔵 Svoboda-MAX: Yota, T-моб, Билайн/netflix": "down",
-  "node:🔵 Svoboda-MAX: Yota, T-моб, Билайн/spotify": "down",
-  "node:🔵 Svoboda-MAX: Yota, T-моб, Билайн/twitch": "down",
-  "node:🔵 Svoboda-MAX: Yota, T-моб, Билайн/github": "down",
-  "node:🇳🇱 Нидерланды - 2  10Gb/s🔥": "degraded",
-  "node:🇳🇱 Нидерланды - 2  10Gb/s🔥/netflix": "down",
-  "node:📺 Youtube/instagram": "down"
+  "node:🇷🇺 ☑️ Россия/facebook": "down",
+  "proxy:82.23.165.157": "degraded",
+  "proxy:82.23.165.157/instagram": "degraded",
+  "proxy:82.23.165.215": "degraded",
+  "proxy:82.23.165.215/instagram": "degraded"
  },
  "last_alert": [
   [
    "-1003950923221",
-   657
+   658
   ]
  ],
  "replaced": {
@@ -591,5 +579,5 @@
    "reason": "не отвечал"
   }
  ],
- "updated_at": "2026-10-04T12:38:47.520039+03:00"
+ "updated_at": "2026-10-04T17:39:27.838038+03:00"
 }
