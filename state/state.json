@@ -156,7 +156,7 @@
   "node:📺 Youtube/claude": "blocked",
   "node:📺 Youtube/youtube": "ok",
   "node:📺 Youtube/instagram": "down",
-  "node:📺 Youtube/facebook": "down",
+  "node:📺 Youtube/facebook": "ok",
   "node:📺 Youtube/tiktok": "ok",
   "node:📺 Youtube/x": "ok",
   "node:📺 Youtube/discord": "ok",
@@ -499,13 +499,15 @@
   "proxy:51.241.109.250/github": "ok"
  },
  "pending": {
-  "node:🇷🇺 ☑️ Россия/instagram": "ok",
-  "node:🇷🇺 ☑️ Россия/facebook": "ok"
+  "node:🇰🇿 ☑️ Казахстан": "degraded",
+  "node:🇰🇿 ☑️ Казахстан/x": "down",
+  "proxy:82.23.165.157": "degraded",
+  "proxy:82.23.165.157/instagram": "degraded"
  },
  "last_alert": [
   [
    "-1003950923221",
-   666
+   669
   ]
  ],
  "replaced": {
@@ -576,5 +578,5 @@
    "reason": "не отвечал"
   }
  ],
- "updated_at": "2026-10-05T03:40:56.434741+03:00"
+ "updated_at": "2026-10-05T08:41:44.863840+03:00"
 }
