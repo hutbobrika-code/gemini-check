@@ -499,13 +499,13 @@
   "proxy:51.241.109.250/github": "ok"
  },
  "pending": {
-  "node:📺 Youtube/facebook": "ok",
-  "node:📺 Youtube/telegram": "ok"
+  "node:🇷🇺 ☑️ Россия/instagram": "down",
+  "node:🇷🇺 ☑️ Россия/facebook": "down"
  },
  "last_alert": [
   [
    "-1003950923221",
-   675
+   678
   ]
  ],
  "replaced": {
@@ -576,5 +576,5 @@
    "reason": "не отвечал"
   }
  ],
- "updated_at": "2026-10-05T18:43:08.326342+03:00"
+ "updated_at": "2026-10-05T23:43:53.337594+03:00"
 }
