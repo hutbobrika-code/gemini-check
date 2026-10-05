@@ -155,7 +155,7 @@
   "node:📺 Youtube/chatgpt": "blocked",
   "node:📺 Youtube/claude": "blocked",
   "node:📺 Youtube/youtube": "ok",
-  "node:📺 Youtube/instagram": "ok",
+  "node:📺 Youtube/instagram": "down",
   "node:📺 Youtube/facebook": "down",
   "node:📺 Youtube/tiktok": "ok",
   "node:📺 Youtube/x": "ok",
@@ -170,7 +170,7 @@
   "node:🇷🇺 ☑️ Россия/chatgpt": "blocked",
   "node:🇷🇺 ☑️ Россия/claude": "blocked",
   "node:🇷🇺 ☑️ Россия/youtube": "ok",
-  "node:🇷🇺 ☑️ Россия/instagram": "ok",
+  "node:🇷🇺 ☑️ Россия/instagram": "down",
   "node:🇷🇺 ☑️ Россия/facebook": "down",
   "node:🇷🇺 ☑️ Россия/tiktok": "ok",
   "node:🇷🇺 ☑️ Россия/x": "ok",
@@ -345,12 +345,12 @@
   "proxy:51.241.109.198/spotify": "ok",
   "proxy:51.241.109.198/twitch": "ok",
   "proxy:51.241.109.198/github": "ok",
-  "proxy:82.23.165.157": "degraded",
+  "proxy:82.23.165.157": "ok",
   "proxy:82.23.165.157/gemini": "ok",
   "proxy:82.23.165.157/chatgpt": "ok",
   "proxy:82.23.165.157/claude": "ok",
   "proxy:82.23.165.157/youtube": "ok",
-  "proxy:82.23.165.157/instagram": "degraded",
+  "proxy:82.23.165.157/instagram": "ok",
   "proxy:82.23.165.157/facebook": "ok",
   "proxy:82.23.165.157/tiktok": "ok",
   "proxy:82.23.165.157/x": "ok",
@@ -437,12 +437,12 @@
   "proxy:95.134.165.249/spotify": "ok",
   "proxy:95.134.165.249/twitch": "ok",
   "proxy:95.134.165.249/github": "ok",
-  "proxy:82.23.165.215": "degraded",
+  "proxy:82.23.165.215": "ok",
   "proxy:82.23.165.215/gemini": "ok",
   "proxy:82.23.165.215/chatgpt": "ok",
   "proxy:82.23.165.215/claude": "ok",
   "proxy:82.23.165.215/youtube": "ok",
-  "proxy:82.23.165.215/instagram": "degraded",
+  "proxy:82.23.165.215/instagram": "ok",
   "proxy:82.23.165.215/facebook": "ok",
   "proxy:82.23.165.215/tiktok": "ok",
   "proxy:82.23.165.215/x": "ok",
@@ -499,15 +499,13 @@
   "proxy:51.241.109.250/github": "ok"
  },
  "pending": {
-  "node:📺 Youtube/facebook": "ok",
-  "node:🇷🇺 ☑️ Россия/instagram": "down",
-  "proxy:45.10.156.204": "degraded",
-  "proxy:45.10.156.204/instagram": "degraded"
+  "node:🇷🇺 ☑️ Россия/instagram": "ok",
+  "node:🇷🇺 ☑️ Россия/facebook": "ok"
  },
  "last_alert": [
   [
    "-1003950923221",
-   662
+   666
   ]
  ],
  "replaced": {
@@ -578,5 +576,5 @@
    "reason": "не отвечал"
   }
  ],
- "updated_at": "2026-10-04T22:40:08.782029+03:00"
+ "updated_at": "2026-10-05T03:40:56.434741+03:00"
 }
