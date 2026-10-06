@@ -170,8 +170,8 @@
   "node:🇷🇺 ☑️ Россия/chatgpt": "blocked",
   "node:🇷🇺 ☑️ Россия/claude": "blocked",
   "node:🇷🇺 ☑️ Россия/youtube": "ok",
-  "node:🇷🇺 ☑️ Россия/instagram": "ok",
-  "node:🇷🇺 ☑️ Россия/facebook": "ok",
+  "node:🇷🇺 ☑️ Россия/instagram": "down",
+  "node:🇷🇺 ☑️ Россия/facebook": "down",
   "node:🇷🇺 ☑️ Россия/tiktok": "ok",
   "node:🇷🇺 ☑️ Россия/x": "ok",
   "node:🇷🇺 ☑️ Россия/discord": "ok",
@@ -315,12 +315,12 @@
   "proxy:104.234.196.39/spotify": "ok",
   "proxy:104.234.196.39/twitch": "ok",
   "proxy:104.234.196.39/github": "ok",
-  "proxy:45.10.156.204": "ok",
+  "proxy:45.10.156.204": "degraded",
   "proxy:45.10.156.204/gemini": "ok",
   "proxy:45.10.156.204/chatgpt": "ok",
   "proxy:45.10.156.204/claude": "ok",
   "proxy:45.10.156.204/youtube": "ok",
-  "proxy:45.10.156.204/instagram": "ok",
+  "proxy:45.10.156.204/instagram": "degraded",
   "proxy:45.10.156.204/facebook": "ok",
   "proxy:45.10.156.204/tiktok": "ok",
   "proxy:45.10.156.204/x": "ok",
@@ -499,13 +499,13 @@
   "proxy:51.241.109.250/github": "ok"
  },
  "pending": {
-  "node:🇷🇺 ☑️ Россия/instagram": "down",
-  "node:🇷🇺 ☑️ Россия/facebook": "down"
+  "node:📺 Youtube/instagram": "ok",
+  "node:📺 Youtube/facebook": "ok"
  },
  "last_alert": [
   [
    "-1003950923221",
-   678
+   680
   ]
  ],
  "replaced": {
@@ -576,5 +576,5 @@
    "reason": "не отвечал"
   }
  ],
- "updated_at": "2026-10-05T23:43:53.337594+03:00"
+ "updated_at": "2026-10-06T08:38:40.707352+03:00"
 }
