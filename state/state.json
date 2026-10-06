@@ -155,8 +155,8 @@
   "node:📺 Youtube/chatgpt": "blocked",
   "node:📺 Youtube/claude": "blocked",
   "node:📺 Youtube/youtube": "ok",
-  "node:📺 Youtube/instagram": "down",
-  "node:📺 Youtube/facebook": "down",
+  "node:📺 Youtube/instagram": "ok",
+  "node:📺 Youtube/facebook": "ok",
   "node:📺 Youtube/tiktok": "ok",
   "node:📺 Youtube/x": "ok",
   "node:📺 Youtube/discord": "ok",
@@ -499,12 +499,15 @@
   "proxy:51.241.109.250/github": "ok"
  },
  "pending": {
-  "node:📺 Youtube/facebook": "ok"
+  "node:🇭🇰 ☑️ Гонконг/gemini": "degraded",
+  "node:🇵🇱  ☑️ Польша ": "degraded",
+  "node:🇵🇱  ☑️ Польша /instagram": "down",
+  "node:🇵🇱  ☑️ Польша /facebook": "down"
  },
  "last_alert": [
   [
    "-1003950923221",
-   682
+   684
   ]
  ],
  "replaced": {
@@ -575,5 +578,5 @@
    "reason": "не отвечал"
   }
  ],
- "updated_at": "2026-10-06T13:39:33.359900+03:00"
+ "updated_at": "2026-10-06T18:40:16.574593+03:00"
 }
