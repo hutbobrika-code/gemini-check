@@ -156,7 +156,7 @@
   "node:📺 Youtube/claude": "blocked",
   "node:📺 Youtube/youtube": "ok",
   "node:📺 Youtube/instagram": "ok",
-  "node:📺 Youtube/facebook": "ok",
+  "node:📺 Youtube/facebook": "down",
   "node:📺 Youtube/tiktok": "ok",
   "node:📺 Youtube/x": "ok",
   "node:📺 Youtube/discord": "ok",
@@ -315,12 +315,12 @@
   "proxy:104.234.196.39/spotify": "ok",
   "proxy:104.234.196.39/twitch": "ok",
   "proxy:104.234.196.39/github": "ok",
-  "proxy:45.10.156.204": "ok",
+  "proxy:45.10.156.204": "degraded",
   "proxy:45.10.156.204/gemini": "ok",
   "proxy:45.10.156.204/chatgpt": "ok",
   "proxy:45.10.156.204/claude": "ok",
   "proxy:45.10.156.204/youtube": "ok",
-  "proxy:45.10.156.204/instagram": "ok",
+  "proxy:45.10.156.204/instagram": "degraded",
   "proxy:45.10.156.204/facebook": "ok",
   "proxy:45.10.156.204/tiktok": "ok",
   "proxy:45.10.156.204/x": "ok",
@@ -499,13 +499,23 @@
   "proxy:51.241.109.250/github": "ok"
  },
  "pending": {
-  "proxy:45.10.156.204": "degraded",
-  "proxy:45.10.156.204/instagram": "degraded"
+  "node:🔵 Svoboda-Auto": "blocked",
+  "node:🔵 Svoboda-Auto/chatgpt": "blocked",
+  "node:🔵 Svoboda-Auto/claude": "blocked",
+  "node:🔵 Svoboda-Auto/netflix": "blocked",
+  "node:🔵 Svoboda-Auto/spotify": "blocked",
+  "node:📺 Youtube/instagram": "down",
+  "node:🇷🇺 ☑️ Россия/instagram": "ok",
+  "node:🇷🇺 ☑️ Россия/facebook": "ok",
+  "proxy:82.23.165.157": "degraded",
+  "proxy:82.23.165.157/instagram": "degraded",
+  "proxy:82.23.165.215": "degraded",
+  "proxy:82.23.165.215/instagram": "degraded"
  },
  "last_alert": [
   [
    "-1003950923221",
-   688
+   691
   ]
  ],
  "replaced": {
@@ -576,5 +586,5 @@
    "reason": "не отвечал"
   }
  ],
- "updated_at": "2026-10-07T04:41:34.029422+03:00"
+ "updated_at": "2026-10-07T09:41:57.230830+03:00"
 }
