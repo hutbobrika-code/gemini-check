@@ -155,10 +155,10 @@
   "node:📺 Youtube/chatgpt": "blocked",
   "node:📺 Youtube/claude": "blocked",
   "node:📺 Youtube/youtube": "ok",
-  "node:📺 Youtube/instagram": "down",
+  "node:📺 Youtube/instagram": "ok",
   "node:📺 Youtube/facebook": "down",
   "node:📺 Youtube/tiktok": "ok",
-  "node:📺 Youtube/x": "ok",
+  "node:📺 Youtube/x": "down",
   "node:📺 Youtube/discord": "ok",
   "node:📺 Youtube/telegram": "down",
   "node:📺 Youtube/netflix": "blocked",
@@ -499,17 +499,16 @@
   "proxy:51.241.109.250/github": "ok"
  },
  "pending": {
-  "node:📺 Youtube/instagram": "ok",
+  "node:🔵 Svoboda-Auto": "blocked",
+  "node:🔵 Svoboda-Auto/chatgpt": "blocked",
+  "node:🔵 Svoboda-Auto/claude": "blocked",
   "node:📺 Youtube/facebook": "ok",
-  "node:📺 Youtube/x": "down",
-  "node:📺 Youtube/telegram": "ok",
-  "proxy:45.10.156.204": "degraded",
-  "proxy:45.10.156.204/instagram": "degraded"
+  "node:🇭🇰 ☑️ Гонконг/spotify": "degraded"
  },
  "last_alert": [
   [
    "-1003950923221",
-   699
+   703
   ]
  ],
  "replaced": {
@@ -580,5 +579,5 @@
    "reason": "не отвечал"
   }
  ],
- "updated_at": "2026-10-07T19:43:07.522785+03:00"
+ "updated_at": "2026-10-08T00:43:41.036255+03:00"
 }
