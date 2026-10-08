@@ -155,10 +155,10 @@
   "node:📺 Youtube/chatgpt": "blocked",
   "node:📺 Youtube/claude": "blocked",
   "node:📺 Youtube/youtube": "ok",
-  "node:📺 Youtube/instagram": "ok",
+  "node:📺 Youtube/instagram": "down",
   "node:📺 Youtube/facebook": "down",
   "node:📺 Youtube/tiktok": "ok",
-  "node:📺 Youtube/x": "down",
+  "node:📺 Youtube/x": "ok",
   "node:📺 Youtube/discord": "ok",
   "node:📺 Youtube/telegram": "down",
   "node:📺 Youtube/netflix": "blocked",
@@ -180,8 +180,8 @@
   "node:🇷🇺 ☑️ Россия/spotify": "ok",
   "node:🇷🇺 ☑️ Россия/twitch": "ok",
   "node:🇷🇺 ☑️ Россия/github": "ok",
-  "node:🇰🇿 ☑️ Казахстан": "ok",
-  "node:🇰🇿 ☑️ Казахстан/gemini": "ok",
+  "node:🇰🇿 ☑️ Казахстан": "down",
+  "node:🇰🇿 ☑️ Казахстан/gemini": "down",
   "node:🇰🇿 ☑️ Казахстан/chatgpt": "ok",
   "node:🇰🇿 ☑️ Казахстан/claude": "ok",
   "node:🇰🇿 ☑️ Казахстан/youtube": "ok",
@@ -225,8 +225,8 @@
   "node:🇮🇳 ☑️ Индия/spotify": "ok",
   "node:🇮🇳 ☑️ Индия/twitch": "ok",
   "node:🇮🇳 ☑️ Индия/github": "ok",
-  "node:🇭🇰 ☑️ Гонконг": "blocked",
-  "node:🇭🇰 ☑️ Гонконг/gemini": "ok",
+  "node:🇭🇰 ☑️ Гонконг": "down",
+  "node:🇭🇰 ☑️ Гонконг/gemini": "down",
   "node:🇭🇰 ☑️ Гонконг/chatgpt": "blocked",
   "node:🇭🇰 ☑️ Гонконг/claude": "blocked",
   "node:🇭🇰 ☑️ Гонконг/youtube": "ok",
@@ -315,12 +315,12 @@
   "proxy:104.234.196.39/spotify": "ok",
   "proxy:104.234.196.39/twitch": "ok",
   "proxy:104.234.196.39/github": "ok",
-  "proxy:45.10.156.204": "ok",
+  "proxy:45.10.156.204": "degraded",
   "proxy:45.10.156.204/gemini": "ok",
   "proxy:45.10.156.204/chatgpt": "ok",
   "proxy:45.10.156.204/claude": "ok",
   "proxy:45.10.156.204/youtube": "ok",
-  "proxy:45.10.156.204/instagram": "ok",
+  "proxy:45.10.156.204/instagram": "degraded",
   "proxy:45.10.156.204/facebook": "ok",
   "proxy:45.10.156.204/tiktok": "ok",
   "proxy:45.10.156.204/x": "ok",
@@ -499,16 +499,12 @@
   "proxy:51.241.109.250/github": "ok"
  },
  "pending": {
-  "node:🔵 Svoboda-Auto": "blocked",
-  "node:🔵 Svoboda-Auto/chatgpt": "blocked",
-  "node:🔵 Svoboda-Auto/claude": "blocked",
-  "node:📺 Youtube/facebook": "ok",
-  "node:🇭🇰 ☑️ Гонконг/spotify": "degraded"
+  "node:🇷🇺 ☑️ Россия/instagram": "down"
  },
  "last_alert": [
   [
    "-1003950923221",
-   703
+   706
   ]
  ],
  "replaced": {
@@ -579,5 +575,5 @@
    "reason": "не отвечал"
   }
  ],
- "updated_at": "2026-10-08T00:43:41.036255+03:00"
+ "updated_at": "2026-10-08T05:44:37.676060+03:00"
 }
