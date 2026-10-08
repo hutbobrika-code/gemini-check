@@ -1,6 +1,6 @@
 {
  "statuses": {
-  "node:⚪️ Svoboda-Auto": "ok",
+  "node:⚪️ Svoboda-Auto": "degraded",
   "node:⚪️ Svoboda-Auto/gemini": "ok",
   "node:⚪️ Svoboda-Auto/chatgpt": "ok",
   "node:⚪️ Svoboda-Auto/claude": "ok",
@@ -120,7 +120,7 @@
   "node:🇳🇱 Нидерланды - 2  10Gb/s🔥/spotify": "ok",
   "node:🇳🇱 Нидерланды - 2  10Gb/s🔥/twitch": "ok",
   "node:🇳🇱 Нидерланды - 2  10Gb/s🔥/github": "ok",
-  "node:🇵🇱  ☑️ Польша ": "ok",
+  "node:🇵🇱  ☑️ Польша ": "degraded",
   "node:🇵🇱  ☑️ Польша /gemini": "ok",
   "node:🇵🇱  ☑️ Польша /chatgpt": "ok",
   "node:🇵🇱  ☑️ Польша /claude": "ok",
@@ -210,8 +210,8 @@
   "node:🇺🇸  ☑️ США/spotify": "ok",
   "node:🇺🇸  ☑️ США/twitch": "ok",
   "node:🇺🇸  ☑️ США/github": "ok",
-  "node:🇮🇳 ☑️ Индия": "ok",
-  "node:🇮🇳 ☑️ Индия/gemini": "ok",
+  "node:🇮🇳 ☑️ Индия": "degraded",
+  "node:🇮🇳 ☑️ Индия/gemini": "degraded",
   "node:🇮🇳 ☑️ Индия/chatgpt": "ok",
   "node:🇮🇳 ☑️ Индия/claude": "ok",
   "node:🇮🇳 ☑️ Индия/youtube": "ok",
@@ -226,7 +226,7 @@
   "node:🇮🇳 ☑️ Индия/twitch": "ok",
   "node:🇮🇳 ☑️ Индия/github": "ok",
   "node:🇭🇰 ☑️ Гонконг": "blocked",
-  "node:🇭🇰 ☑️ Гонконг/gemini": "ok",
+  "node:🇭🇰 ☑️ Гонконг/gemini": "down",
   "node:🇭🇰 ☑️ Гонконг/chatgpt": "blocked",
   "node:🇭🇰 ☑️ Гонконг/claude": "blocked",
   "node:🇭🇰 ☑️ Гонконг/youtube": "ok",
@@ -499,13 +499,30 @@
   "proxy:51.241.109.250/github": "ok"
  },
  "pending": {
-  "node:📺 Youtube/facebook": "down",
-  "node:🇭🇰 ☑️ Гонконг/spotify": "down"
+  "node:⚪️ Svoboda-Auto/gemini": "down",
+  "node:⚪️ Svoboda: Экспериментальный 2": "down",
+  "node:⚪️ Svoboda: Экспериментальный 2/gemini": "down",
+  "node:🇳🇱 Нидерланды 10Gb/s🔥": "down",
+  "node:🇳🇱 Нидерланды 10Gb/s🔥/gemini": "down",
+  "node:🇳🇱 Нидерланды - 2  10Gb/s🔥": "down",
+  "node:🇳🇱 Нидерланды - 2  10Gb/s🔥/gemini": "down",
+  "node:🇵🇱  ☑️ Польша ": "ok",
+  "node:📺 Youtube/instagram": "ok",
+  "node:📺 Youtube/x": "down",
+  "node:📺 Youtube/telegram": "ok",
+  "node:🇮🇳 ☑️ Индия": "ok",
+  "node:🇮🇳 ☑️ Индия/gemini": "ok",
+  "node:🇭🇰 ☑️ Гонконг/gemini": "ok",
+  "proxy:82.23.165.157": "degraded",
+  "proxy:82.23.165.157/instagram": "degraded",
+  "proxy:82.23.165.215": "degraded",
+  "proxy:82.23.165.215/instagram": "degraded",
+  "proxy:104.234.196.176": "degraded"
  },
  "last_alert": [
   [
    "-1003950923221",
-   713
+   715
   ]
  ],
  "replaced": {
@@ -576,5 +593,5 @@
    "reason": "не отвечал"
   }
  ],
- "updated_at": "2026-10-08T15:46:01.110898+03:00"
+ "updated_at": "2026-10-08T20:46:29.294743+03:00"
 }
