@@ -90,8 +90,8 @@
   "node:🔵 Svoboda-MAX: Yota, T-моб, Билайн/spotify": "ok",
   "node:🔵 Svoboda-MAX: Yota, T-моб, Билайн/twitch": "ok",
   "node:🔵 Svoboda-MAX: Yota, T-моб, Билайн/github": "ok",
-  "node:🇳🇱 Нидерланды 10Gb/s🔥": "ok",
-  "node:🇳🇱 Нидерланды 10Gb/s🔥/gemini": "ok",
+  "node:🇳🇱 Нидерланды 10Gb/s🔥": "down",
+  "node:🇳🇱 Нидерланды 10Gb/s🔥/gemini": "down",
   "node:🇳🇱 Нидерланды 10Gb/s🔥/chatgpt": "ok",
   "node:🇳🇱 Нидерланды 10Gb/s🔥/claude": "ok",
   "node:🇳🇱 Нидерланды 10Gb/s🔥/youtube": "ok",
@@ -120,7 +120,7 @@
   "node:🇳🇱 Нидерланды - 2  10Gb/s🔥/spotify": "ok",
   "node:🇳🇱 Нидерланды - 2  10Gb/s🔥/twitch": "ok",
   "node:🇳🇱 Нидерланды - 2  10Gb/s🔥/github": "ok",
-  "node:🇵🇱  ☑️ Польша ": "degraded",
+  "node:🇵🇱  ☑️ Польша ": "ok",
   "node:🇵🇱  ☑️ Польша /gemini": "ok",
   "node:🇵🇱  ☑️ Польша /chatgpt": "ok",
   "node:🇵🇱  ☑️ Польша /claude": "ok",
@@ -135,8 +135,8 @@
   "node:🇵🇱  ☑️ Польша /spotify": "ok",
   "node:🇵🇱  ☑️ Польша /twitch": "ok",
   "node:🇵🇱  ☑️ Польша /github": "ok",
-  "node:🇫🇮  ☑️ Финляндия": "ok",
-  "node:🇫🇮  ☑️ Финляндия/gemini": "ok",
+  "node:🇫🇮  ☑️ Финляндия": "degraded",
+  "node:🇫🇮  ☑️ Финляндия/gemini": "degraded",
   "node:🇫🇮  ☑️ Финляндия/chatgpt": "ok",
   "node:🇫🇮  ☑️ Финляндия/claude": "ok",
   "node:🇫🇮  ☑️ Финляндия/youtube": "ok",
@@ -158,7 +158,7 @@
   "node:📺 Youtube/instagram": "down",
   "node:📺 Youtube/facebook": "ok",
   "node:📺 Youtube/tiktok": "ok",
-  "node:📺 Youtube/x": "ok",
+  "node:📺 Youtube/x": "down",
   "node:📺 Youtube/discord": "ok",
   "node:📺 Youtube/telegram": "down",
   "node:📺 Youtube/netflix": "blocked",
@@ -210,8 +210,8 @@
   "node:🇺🇸  ☑️ США/spotify": "ok",
   "node:🇺🇸  ☑️ США/twitch": "ok",
   "node:🇺🇸  ☑️ США/github": "ok",
-  "node:🇮🇳 ☑️ Индия": "degraded",
-  "node:🇮🇳 ☑️ Индия/gemini": "degraded",
+  "node:🇮🇳 ☑️ Индия": "ok",
+  "node:🇮🇳 ☑️ Индия/gemini": "ok",
   "node:🇮🇳 ☑️ Индия/chatgpt": "ok",
   "node:🇮🇳 ☑️ Индия/claude": "ok",
   "node:🇮🇳 ☑️ Индия/youtube": "ok",
@@ -226,7 +226,7 @@
   "node:🇮🇳 ☑️ Индия/twitch": "ok",
   "node:🇮🇳 ☑️ Индия/github": "ok",
   "node:🇭🇰 ☑️ Гонконг": "blocked",
-  "node:🇭🇰 ☑️ Гонконг/gemini": "down",
+  "node:🇭🇰 ☑️ Гонконг/gemini": "ok",
   "node:🇭🇰 ☑️ Гонконг/chatgpt": "blocked",
   "node:🇭🇰 ☑️ Гонконг/claude": "blocked",
   "node:🇭🇰 ☑️ Гонконг/youtube": "ok",
@@ -360,8 +360,8 @@
   "proxy:82.23.165.157/spotify": "ok",
   "proxy:82.23.165.157/twitch": "ok",
   "proxy:82.23.165.157/github": "ok",
-  "proxy:93.88.154.91": "ok",
-  "proxy:93.88.154.91/gemini": "ok",
+  "proxy:93.88.154.91": "degraded",
+  "proxy:93.88.154.91/gemini": "degraded",
   "proxy:93.88.154.91/chatgpt": "ok",
   "proxy:93.88.154.91/claude": "ok",
   "proxy:93.88.154.91/youtube": "ok",
@@ -499,39 +499,29 @@
   "proxy:51.241.109.250/github": "ok"
  },
  "pending": {
-  "node:⚪️ Svoboda-Auto/gemini": "down",
   "node:⚪️ Svoboda: Экспериментальный 2": "down",
   "node:⚪️ Svoboda: Экспериментальный 2/gemini": "down",
-  "node:🇳🇱 Нидерланды 10Gb/s🔥": "down",
-  "node:🇳🇱 Нидерланды 10Gb/s🔥/gemini": "down",
   "node:🇳🇱 Нидерланды - 2  10Gb/s🔥": "down",
   "node:🇳🇱 Нидерланды - 2  10Gb/s🔥/gemini": "down",
-  "node:🇵🇱  ☑️ Польша ": "ok",
-  "node:📺 Youtube/instagram": "ok",
-  "node:📺 Youtube/x": "down",
-  "node:📺 Youtube/telegram": "ok",
-  "node:🇮🇳 ☑️ Индия": "ok",
-  "node:🇮🇳 ☑️ Индия/gemini": "ok",
-  "node:🇭🇰 ☑️ Гонконг/gemini": "ok",
-  "proxy:82.23.165.157": "degraded",
-  "proxy:82.23.165.157/instagram": "degraded",
-  "proxy:82.23.165.215": "degraded",
-  "proxy:82.23.165.215/instagram": "degraded",
-  "proxy:104.234.196.176": "degraded"
+  "node:⚪️ Svoboda-Auto": "ok",
+  "node:🇺🇸  ☑️ США": "degraded",
+  "node:🇺🇸  ☑️ США/gemini": "down"
  },
  "last_alert": [
   [
    "-1003950923221",
-   715
+   721
   ]
  ],
  "replaced": {
   "185.13.225.69": "2026-09-15T22:32:40.517956+03:00",
-  "93.88.158.121": "2026-09-19T21:52:16.216027+03:00"
+  "93.88.158.121": "2026-09-19T21:52:16.216027+03:00",
+  "93.88.154.91": "2026-10-08T23:54:10.793698+03:00"
  },
  "replace_reason": {
   "185.13.225.69": "не отвечал",
-  "93.88.158.121": "не отвечал"
+  "93.88.158.121": "не отвечал",
+  "93.88.154.91": "капча Google"
  },
  "ips": {
   "39685878": "72.56.155.173",
@@ -593,5 +583,5 @@
    "reason": "не отвечал"
   }
  ],
- "updated_at": "2026-10-08T20:46:29.294743+03:00"
+ "updated_at": "2026-10-09T01:47:15.105811+03:00"
 }
