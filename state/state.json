@@ -1,7 +1,7 @@
 {
  "statuses": {
   "node:⚪️ Svoboda-Auto": "degraded",
-  "node:⚪️ Svoboda-Auto/gemini": "ok",
+  "node:⚪️ Svoboda-Auto/gemini": "down",
   "node:⚪️ Svoboda-Auto/chatgpt": "ok",
   "node:⚪️ Svoboda-Auto/claude": "ok",
   "node:⚪️ Svoboda-Auto/youtube": "ok",
@@ -90,8 +90,8 @@
   "node:🔵 Svoboda-MAX: Yota, T-моб, Билайн/spotify": "ok",
   "node:🔵 Svoboda-MAX: Yota, T-моб, Билайн/twitch": "ok",
   "node:🔵 Svoboda-MAX: Yota, T-моб, Билайн/github": "ok",
-  "node:🇳🇱 Нидерланды 10Gb/s🔥": "down",
-  "node:🇳🇱 Нидерланды 10Gb/s🔥/gemini": "down",
+  "node:🇳🇱 Нидерланды 10Gb/s🔥": "degraded",
+  "node:🇳🇱 Нидерланды 10Gb/s🔥/gemini": "degraded",
   "node:🇳🇱 Нидерланды 10Gb/s🔥/chatgpt": "ok",
   "node:🇳🇱 Нидерланды 10Gb/s🔥/claude": "ok",
   "node:🇳🇱 Нидерланды 10Gb/s🔥/youtube": "ok",
@@ -135,8 +135,8 @@
   "node:🇵🇱  ☑️ Польша /spotify": "ok",
   "node:🇵🇱  ☑️ Польша /twitch": "ok",
   "node:🇵🇱  ☑️ Польша /github": "ok",
-  "node:🇫🇮  ☑️ Финляндия": "degraded",
-  "node:🇫🇮  ☑️ Финляндия/gemini": "degraded",
+  "node:🇫🇮  ☑️ Финляндия": "ok",
+  "node:🇫🇮  ☑️ Финляндия/gemini": "ok",
   "node:🇫🇮  ☑️ Финляндия/chatgpt": "ok",
   "node:🇫🇮  ☑️ Финляндия/claude": "ok",
   "node:🇫🇮  ☑️ Финляндия/youtube": "ok",
@@ -155,10 +155,10 @@
   "node:📺 Youtube/chatgpt": "blocked",
   "node:📺 Youtube/claude": "blocked",
   "node:📺 Youtube/youtube": "ok",
-  "node:📺 Youtube/instagram": "down",
-  "node:📺 Youtube/facebook": "ok",
+  "node:📺 Youtube/instagram": "ok",
+  "node:📺 Youtube/facebook": "down",
   "node:📺 Youtube/tiktok": "ok",
-  "node:📺 Youtube/x": "down",
+  "node:📺 Youtube/x": "ok",
   "node:📺 Youtube/discord": "ok",
   "node:📺 Youtube/telegram": "down",
   "node:📺 Youtube/netflix": "blocked",
@@ -499,18 +499,21 @@
   "proxy:51.241.109.250/github": "ok"
  },
  "pending": {
-  "node:⚪️ Svoboda: Экспериментальный 2": "down",
+  "node:⚪️ Svoboda: Экспериментальный 2": "degraded",
   "node:⚪️ Svoboda: Экспериментальный 2/gemini": "down",
-  "node:🇳🇱 Нидерланды - 2  10Gb/s🔥": "down",
-  "node:🇳🇱 Нидерланды - 2  10Gb/s🔥/gemini": "down",
-  "node:⚪️ Svoboda-Auto": "ok",
-  "node:🇺🇸  ☑️ США": "degraded",
-  "node:🇺🇸  ☑️ США/gemini": "down"
+  "node:🇳🇱 Нидерланды - 2  10Gb/s🔥": "degraded",
+  "node:🇳🇱 Нидерланды - 2  10Gb/s🔥/gemini": "degraded",
+  "node:🇵🇱  ☑️ Польша ": "degraded",
+  "node:🇵🇱  ☑️ Польша /gemini": "degraded",
+  "node:🇷🇺 ☑️ Россия/instagram": "down",
+  "proxy:82.23.165.215": "degraded",
+  "proxy:82.23.165.215/instagram": "degraded",
+  "proxy:104.234.196.176": "degraded"
  },
  "last_alert": [
   [
    "-1003950923221",
-   721
+   725
   ]
  ],
  "replaced": {
@@ -583,5 +586,5 @@
    "reason": "не отвечал"
   }
  ],
- "updated_at": "2026-10-09T01:47:15.105811+03:00"
+ "updated_at": "2026-10-09T06:47:27.648426+03:00"
 }
