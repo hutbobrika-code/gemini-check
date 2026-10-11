@@ -54,11 +54,11 @@
   "node:⚪️ Svoboda: Экспериментальный 2/facebook": "ok",
   "node:⚪️ Svoboda: Экспериментальный 2/tiktok": "ok",
   "node:⚪️ Svoboda: Экспериментальный 2/x": "ok",
-  "node:⚪️ Svoboda: Экспериментальный 2/discord": "down",
-  "node:⚪️ Svoboda: Экспериментальный 2/telegram": "down",
-  "node:⚪️ Svoboda: Экспериментальный 2/netflix": "down",
-  "node:⚪️ Svoboda: Экспериментальный 2/spotify": "down",
-  "node:⚪️ Svoboda: Экспериментальный 2/twitch": "down",
+  "node:⚪️ Svoboda: Экспериментальный 2/discord": "ok",
+  "node:⚪️ Svoboda: Экспериментальный 2/telegram": "ok",
+  "node:⚪️ Svoboda: Экспериментальный 2/netflix": "ok",
+  "node:⚪️ Svoboda: Экспериментальный 2/spotify": "ok",
+  "node:⚪️ Svoboda: Экспериментальный 2/twitch": "ok",
   "node:⚪️ Svoboda: Экспериментальный 2/github": "ok",
   "node:🔵 Svoboda-MAX: Все операторы": "ok",
   "node:🔵 Svoboda-MAX: Все операторы/gemini": "ok",
@@ -136,7 +136,7 @@
   "node:🇵🇱  ☑️ Польша /twitch": "ok",
   "node:🇵🇱  ☑️ Польша /github": "ok",
   "node:🇫🇮  ☑️ Финляндия": "degraded",
-  "node:🇫🇮  ☑️ Финляндия/gemini": "degraded",
+  "node:🇫🇮  ☑️ Финляндия/gemini": "ok",
   "node:🇫🇮  ☑️ Финляндия/chatgpt": "ok",
   "node:🇫🇮  ☑️ Финляндия/claude": "ok",
   "node:🇫🇮  ☑️ Финляндия/youtube": "ok",
@@ -156,7 +156,7 @@
   "node:📺 Youtube/claude": "blocked",
   "node:📺 Youtube/youtube": "ok",
   "node:📺 Youtube/instagram": "ok",
-  "node:📺 Youtube/facebook": "ok",
+  "node:📺 Youtube/facebook": "down",
   "node:📺 Youtube/tiktok": "ok",
   "node:📺 Youtube/x": "ok",
   "node:📺 Youtube/discord": "ok",
@@ -180,7 +180,7 @@
   "node:🇷🇺 ☑️ Россия/spotify": "ok",
   "node:🇷🇺 ☑️ Россия/twitch": "ok",
   "node:🇷🇺 ☑️ Россия/github": "ok",
-  "node:🇰🇿 ☑️ Казахстан": "degraded",
+  "node:🇰🇿 ☑️ Казахстан": "ok",
   "node:🇰🇿 ☑️ Казахстан/gemini": "ok",
   "node:🇰🇿 ☑️ Казахстан/chatgpt": "ok",
   "node:🇰🇿 ☑️ Казахстан/claude": "ok",
@@ -195,8 +195,8 @@
   "node:🇰🇿 ☑️ Казахстан/spotify": "ok",
   "node:🇰🇿 ☑️ Казахстан/twitch": "ok",
   "node:🇰🇿 ☑️ Казахстан/github": "ok",
-  "node:🇺🇸  ☑️ США": "degraded",
-  "node:🇺🇸  ☑️ США/gemini": "down",
+  "node:🇺🇸  ☑️ США": "ok",
+  "node:🇺🇸  ☑️ США/gemini": "ok",
   "node:🇺🇸  ☑️ США/chatgpt": "ok",
   "node:🇺🇸  ☑️ США/claude": "ok",
   "node:🇺🇸  ☑️ США/youtube": "ok",
@@ -255,7 +255,7 @@
   "node: 🇫🇷 ☑️ Франция/spotify": "ok",
   "node: 🇫🇷 ☑️ Франция/twitch": "ok",
   "node: 🇫🇷 ☑️ Франция/github": "ok",
-  "node:🇩🇪 ☑️ Германия": "ok",
+  "node:🇩🇪 ☑️ Германия": "degraded",
   "node:🇩🇪 ☑️ Германия/gemini": "ok",
   "node:🇩🇪 ☑️ Германия/chatgpt": "ok",
   "node:🇩🇪 ☑️ Германия/claude": "ok",
@@ -601,34 +601,62 @@
   "proxy:185.13.225.231/netflix": "ok",
   "proxy:185.13.225.231/spotify": "ok",
   "proxy:185.13.225.231/twitch": "ok",
-  "proxy:185.13.225.231/github": "ok"
+  "proxy:185.13.225.231/github": "ok",
+  "proxy:188.255.196.50": "ok",
+  "proxy:188.255.196.50/gemini": "ok",
+  "proxy:188.255.196.50/chatgpt": "ok",
+  "proxy:188.255.196.50/claude": "ok",
+  "proxy:188.255.196.50/youtube": "ok",
+  "proxy:188.255.196.50/instagram": "ok",
+  "proxy:188.255.196.50/facebook": "ok",
+  "proxy:188.255.196.50/tiktok": "ok",
+  "proxy:188.255.196.50/x": "ok",
+  "proxy:188.255.196.50/discord": "ok",
+  "proxy:188.255.196.50/telegram": "ok",
+  "proxy:188.255.196.50/netflix": "ok",
+  "proxy:188.255.196.50/spotify": "ok",
+  "proxy:188.255.196.50/twitch": "ok",
+  "proxy:188.255.196.50/github": "ok"
  },
  "pending": {
-  "node:🇰🇿 ☑️ Казахстан/gemini": "degraded",
-  "node:⚪️ Svoboda-Auto/gemini": "degraded",
-  "node:🇳🇱 Нидерланды 10Gb/s🔥": "down",
-  "node:🇳🇱 Нидерланды 10Gb/s🔥/gemini": "down",
-  "node:🇭🇰 ☑️ Гонконг/gemini": "down",
+  "node:🇳🇱 Нидерланды 10Gb/s🔥": "ok",
+  "node:🇳🇱 Нидерланды 10Gb/s🔥/gemini": "ok",
+  "node:🇩🇪 ☑️ Германия/gemini": "down",
   "node:🇫🇮  ☑️ Финляндия/gemini": "down",
-  "proxy:51.241.111.54": "degraded"
+  "node:🔵 Svoboda-Auto": "blocked",
+  "node:🔵 Svoboda-Auto/chatgpt": "blocked",
+  "node:🔵 Svoboda-Auto/claude": "blocked",
+  "node:🇳🇱 Нидерланды - 2  10Gb/s🔥": "ok",
+  "node:🇳🇱 Нидерланды - 2  10Gb/s🔥/gemini": "ok",
+  "node:📺 Youtube/facebook": "ok",
+  "node:📺 Youtube/x": "down",
+  "node:🇮🇳 ☑️ Индия": "degraded",
+  "node:🇮🇳 ☑️ Индия/gemini": "down",
+  "node: 🇫🇷 ☑️ Франция": "degraded",
+  "node: 🇫🇷 ☑️ Франция/gemini": "down",
+  "proxy:104.234.196.176": "degraded",
+  "proxy:51.241.23.78": "degraded",
+  "proxy:51.241.23.78/gemini": "down"
  },
  "last_alert": [
   [
    "-1003950923221",
-   783
+   788
   ]
  ],
  "replaced": {
   "185.13.225.69": "2026-09-15T22:32:40.517956+03:00",
   "93.88.158.121": "2026-09-19T21:52:16.216027+03:00",
   "93.88.154.91": "2026-10-08T23:54:10.793698+03:00",
-  "93.88.154.187": "2026-10-09T23:57:06.520656+03:00"
+  "93.88.154.187": "2026-10-09T23:57:06.520656+03:00",
+  "82.23.165.1": "2026-10-11T22:03:25.267759+03:00"
  },
  "replace_reason": {
   "185.13.225.69": "не отвечал",
   "93.88.158.121": "не отвечал",
   "93.88.154.91": "капча Google",
-  "93.88.154.187": "капча Google"
+  "93.88.154.187": "капча Google",
+  "82.23.165.1": "не отвечал"
  },
  "ips": {
   "39685878": "72.56.155.173",
@@ -695,7 +723,13 @@
   "41405007": "185.13.225.124",
   "41405008": "185.13.225.231",
   "41405009": "51.241.111.54",
-  "41405010": "82.23.165.1"
+  "41405010": "82.23.165.1",
+  "41469747": "51.241.111.54",
+  "41469748": "45.10.156.106",
+  "41469749": "185.13.225.124",
+  "41469750": "188.255.196.195",
+  "41469751": "185.13.225.231",
+  "41469752": "188.255.196.50"
  },
  "replacement_log": [
   {
@@ -706,5 +740,5 @@
    "reason": "не отвечал"
   }
  ],
- "updated_at": "2026-10-11T18:55:07.568774+03:00"
+ "updated_at": "2026-10-11T23:55:25.948267+03:00"
 }
