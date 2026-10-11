@@ -1,7 +1,7 @@
 {
  "statuses": {
-  "node:⚪️ Svoboda-Auto": "degraded",
-  "node:⚪️ Svoboda-Auto/gemini": "degraded",
+  "node:⚪️ Svoboda-Auto": "ok",
+  "node:⚪️ Svoboda-Auto/gemini": "ok",
   "node:⚪️ Svoboda-Auto/chatgpt": "ok",
   "node:⚪️ Svoboda-Auto/claude": "ok",
   "node:⚪️ Svoboda-Auto/youtube": "ok",
@@ -45,14 +45,14 @@
   "node:⚪️ Svoboda: Экспериментальный/spotify": "ok",
   "node:⚪️ Svoboda: Экспериментальный/twitch": "ok",
   "node:⚪️ Svoboda: Экспериментальный/github": "ok",
-  "node:⚪️ Svoboda: Экспериментальный 2": "down",
-  "node:⚪️ Svoboda: Экспериментальный 2/gemini": "down",
+  "node:⚪️ Svoboda: Экспериментальный 2": "degraded",
+  "node:⚪️ Svoboda: Экспериментальный 2/gemini": "ok",
   "node:⚪️ Svoboda: Экспериментальный 2/chatgpt": "ok",
   "node:⚪️ Svoboda: Экспериментальный 2/claude": "ok",
   "node:⚪️ Svoboda: Экспериментальный 2/youtube": "ok",
   "node:⚪️ Svoboda: Экспериментальный 2/instagram": "ok",
   "node:⚪️ Svoboda: Экспериментальный 2/facebook": "ok",
-  "node:⚪️ Svoboda: Экспериментальный 2/tiktok": "ok",
+  "node:⚪️ Svoboda: Экспериментальный 2/tiktok": "down",
   "node:⚪️ Svoboda: Экспериментальный 2/x": "ok",
   "node:⚪️ Svoboda: Экспериментальный 2/discord": "ok",
   "node:⚪️ Svoboda: Экспериментальный 2/telegram": "ok",
@@ -91,7 +91,7 @@
   "node:🔵 Svoboda-MAX: Yota, T-моб, Билайн/twitch": "ok",
   "node:🔵 Svoboda-MAX: Yota, T-моб, Билайн/github": "ok",
   "node:🇳🇱 Нидерланды 10Gb/s🔥": "degraded",
-  "node:🇳🇱 Нидерланды 10Gb/s🔥/gemini": "down",
+  "node:🇳🇱 Нидерланды 10Gb/s🔥/gemini": "degraded",
   "node:🇳🇱 Нидерланды 10Gb/s🔥/chatgpt": "ok",
   "node:🇳🇱 Нидерланды 10Gb/s🔥/claude": "ok",
   "node:🇳🇱 Нидерланды 10Gb/s🔥/youtube": "ok",
@@ -105,8 +105,8 @@
   "node:🇳🇱 Нидерланды 10Gb/s🔥/spotify": "ok",
   "node:🇳🇱 Нидерланды 10Gb/s🔥/twitch": "ok",
   "node:🇳🇱 Нидерланды 10Gb/s🔥/github": "ok",
-  "node:🇳🇱 Нидерланды - 2  10Gb/s🔥": "degraded",
-  "node:🇳🇱 Нидерланды - 2  10Gb/s🔥/gemini": "degraded",
+  "node:🇳🇱 Нидерланды - 2  10Gb/s🔥": "ok",
+  "node:🇳🇱 Нидерланды - 2  10Gb/s🔥/gemini": "ok",
   "node:🇳🇱 Нидерланды - 2  10Gb/s🔥/chatgpt": "ok",
   "node:🇳🇱 Нидерланды - 2  10Gb/s🔥/claude": "ok",
   "node:🇳🇱 Нидерланды - 2  10Gb/s🔥/youtube": "ok",
@@ -135,8 +135,8 @@
   "node:🇵🇱  ☑️ Польша /spotify": "ok",
   "node:🇵🇱  ☑️ Польша /twitch": "ok",
   "node:🇵🇱  ☑️ Польша /github": "ok",
-  "node:🇫🇮  ☑️ Финляндия": "ok",
-  "node:🇫🇮  ☑️ Финляндия/gemini": "ok",
+  "node:🇫🇮  ☑️ Финляндия": "down",
+  "node:🇫🇮  ☑️ Финляндия/gemini": "down",
   "node:🇫🇮  ☑️ Финляндия/chatgpt": "ok",
   "node:🇫🇮  ☑️ Финляндия/claude": "ok",
   "node:🇫🇮  ☑️ Финляндия/youtube": "ok",
@@ -155,10 +155,10 @@
   "node:📺 Youtube/chatgpt": "blocked",
   "node:📺 Youtube/claude": "blocked",
   "node:📺 Youtube/youtube": "ok",
-  "node:📺 Youtube/instagram": "ok",
+  "node:📺 Youtube/instagram": "down",
   "node:📺 Youtube/facebook": "down",
   "node:📺 Youtube/tiktok": "ok",
-  "node:📺 Youtube/x": "down",
+  "node:📺 Youtube/x": "ok",
   "node:📺 Youtube/discord": "ok",
   "node:📺 Youtube/telegram": "down",
   "node:📺 Youtube/netflix": "blocked",
@@ -512,7 +512,7 @@
   "proxy:93.88.154.187/spotify": "ok",
   "proxy:93.88.154.187/twitch": "ok",
   "proxy:93.88.154.187/github": "ok",
-  "proxy:45.10.156.106": "ok",
+  "proxy:45.10.156.106": "degraded",
   "proxy:45.10.156.106/gemini": "ok",
   "proxy:45.10.156.106/chatgpt": "ok",
   "proxy:45.10.156.106/claude": "ok",
@@ -572,7 +572,7 @@
   "proxy:82.23.165.1/spotify": "ok",
   "proxy:82.23.165.1/twitch": "ok",
   "proxy:82.23.165.1/github": "ok",
-  "proxy:51.241.111.54": "degraded",
+  "proxy:51.241.111.54": "ok",
   "proxy:51.241.111.54/gemini": "ok",
   "proxy:51.241.111.54/chatgpt": "ok",
   "proxy:51.241.111.54/claude": "ok",
@@ -604,22 +604,18 @@
   "proxy:185.13.225.231/github": "ok"
  },
  "pending": {
-  "node:🇳🇱 Нидерланды 10Gb/s🔥/gemini": "degraded",
-  "node:🇳🇱 Нидерланды - 2  10Gb/s🔥/gemini": "down",
-  "node:⚪️ Svoboda: Экспериментальный 2": "degraded",
-  "node:🇵🇱  ☑️ Польша ": "degraded",
-  "node:🇵🇱  ☑️ Польша /gemini": "degraded",
+  "node:⚪️ Svoboda: Экспериментальный 2": "ok",
+  "node:⚪️ Svoboda: Экспериментальный 2/tiktok": "ok",
+  "node:🇳🇱 Нидерланды 10Gb/s🔥": "ok",
+  "node:🇳🇱 Нидерланды 10Gb/s🔥/gemini": "ok",
   "node:📺 Youtube/facebook": "ok",
-  "node:🇩🇪 ☑️ Германия": "degraded",
-  "node:🇩🇪 ☑️ Германия/gemini": "down",
-  "proxy:45.10.156.106": "degraded",
-  "proxy:45.10.156.106/instagram": "degraded",
-  "proxy:51.241.111.54": "ok"
+  "node:🇫🇮  ☑️ Финляндия": "ok",
+  "node:🇫🇮  ☑️ Финляндия/gemini": "ok"
  },
  "last_alert": [
   [
    "-1003950923221",
-   768
+   773
   ]
  ],
  "replaced": {
@@ -710,5 +706,5 @@
    "reason": "не отвечал"
   }
  ],
- "updated_at": "2026-10-11T03:52:41.238734+03:00"
+ "updated_at": "2026-10-11T08:53:23.735163+03:00"
 }
