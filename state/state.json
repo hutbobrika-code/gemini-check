@@ -156,7 +156,7 @@
   "node:📺 Youtube/claude": "blocked",
   "node:📺 Youtube/youtube": "ok",
   "node:📺 Youtube/instagram": "ok",
-  "node:📺 Youtube/facebook": "down",
+  "node:📺 Youtube/facebook": "ok",
   "node:📺 Youtube/tiktok": "ok",
   "node:📺 Youtube/x": "down",
   "node:📺 Youtube/discord": "ok",
@@ -180,8 +180,8 @@
   "node:🇷🇺 ☑️ Россия/spotify": "ok",
   "node:🇷🇺 ☑️ Россия/twitch": "ok",
   "node:🇷🇺 ☑️ Россия/github": "ok",
-  "node:🇰🇿 ☑️ Казахстан": "ok",
-  "node:🇰🇿 ☑️ Казахстан/gemini": "ok",
+  "node:🇰🇿 ☑️ Казахстан": "degraded",
+  "node:🇰🇿 ☑️ Казахстан/gemini": "down",
   "node:🇰🇿 ☑️ Казахстан/chatgpt": "ok",
   "node:🇰🇿 ☑️ Казахстан/claude": "ok",
   "node:🇰🇿 ☑️ Казахстан/youtube": "ok",
@@ -210,8 +210,8 @@
   "node:🇺🇸  ☑️ США/spotify": "ok",
   "node:🇺🇸  ☑️ США/twitch": "ok",
   "node:🇺🇸  ☑️ США/github": "ok",
-  "node:🇮🇳 ☑️ Индия": "ok",
-  "node:🇮🇳 ☑️ Индия/gemini": "ok",
+  "node:🇮🇳 ☑️ Индия": "degraded",
+  "node:🇮🇳 ☑️ Индия/gemini": "down",
   "node:🇮🇳 ☑️ Индия/chatgpt": "ok",
   "node:🇮🇳 ☑️ Индия/claude": "ok",
   "node:🇮🇳 ☑️ Индия/youtube": "ok",
@@ -226,7 +226,7 @@
   "node:🇮🇳 ☑️ Индия/twitch": "ok",
   "node:🇮🇳 ☑️ Индия/github": "ok",
   "node:🇭🇰 ☑️ Гонконг": "blocked",
-  "node:🇭🇰 ☑️ Гонконг/gemini": "ok",
+  "node:🇭🇰 ☑️ Гонконг/gemini": "down",
   "node:🇭🇰 ☑️ Гонконг/chatgpt": "blocked",
   "node:🇭🇰 ☑️ Гонконг/claude": "blocked",
   "node:🇭🇰 ☑️ Гонконг/youtube": "ok",
@@ -240,8 +240,8 @@
   "node:🇭🇰 ☑️ Гонконг/spotify": "blocked",
   "node:🇭🇰 ☑️ Гонконг/twitch": "ok",
   "node:🇭🇰 ☑️ Гонконг/github": "ok",
-  "node: 🇫🇷 ☑️ Франция": "ok",
-  "node: 🇫🇷 ☑️ Франция/gemini": "ok",
+  "node: 🇫🇷 ☑️ Франция": "degraded",
+  "node: 🇫🇷 ☑️ Франция/gemini": "down",
   "node: 🇫🇷 ☑️ Франция/chatgpt": "ok",
   "node: 🇫🇷 ☑️ Франция/claude": "ok",
   "node: 🇫🇷 ☑️ Франция/youtube": "ok",
@@ -621,13 +621,16 @@
   "proxy:185.13.225.69/gemini": "down"
  },
  "pending": {
-  "node:⚪️ Svoboda-Auto/gemini": "down",
-  "node:🇭🇰 ☑️ Гонконг/gemini": "degraded"
+  "node:🇭🇰 ☑️ Гонконг/gemini": "ok",
+  "node:📺 Youtube/instagram": "down",
+  "node:📺 Youtube/x": "ok",
+  "node:🇫🇮  ☑️ Финляндия": "ok",
+  "node:🇫🇮  ☑️ Финляндия/gemini": "ok"
  },
  "last_alert": [
   [
    "-1003950923221",
-   812
+   816
   ]
  ],
  "replaced": {
@@ -734,5 +737,5 @@
    "reason": "не отвечал"
   }
  ],
- "updated_at": "2026-10-12T19:58:20.354030+03:00"
+ "updated_at": "2026-10-13T00:58:56.723437+03:00"
 }
