@@ -1,7 +1,7 @@
 {
  "statuses": {
   "node:⚪️ Svoboda-Auto": "degraded",
-  "node:⚪️ Svoboda-Auto/gemini": "degraded",
+  "node:⚪️ Svoboda-Auto/gemini": "down",
   "node:⚪️ Svoboda-Auto/chatgpt": "ok",
   "node:⚪️ Svoboda-Auto/claude": "ok",
   "node:⚪️ Svoboda-Auto/youtube": "ok",
@@ -155,7 +155,7 @@
   "node:📺 Youtube/chatgpt": "blocked",
   "node:📺 Youtube/claude": "blocked",
   "node:📺 Youtube/youtube": "ok",
-  "node:📺 Youtube/instagram": "down",
+  "node:📺 Youtube/instagram": "ok",
   "node:📺 Youtube/facebook": "ok",
   "node:📺 Youtube/tiktok": "ok",
   "node:📺 Youtube/x": "ok",
@@ -226,7 +226,7 @@
   "node:🇮🇳 ☑️ Индия/twitch": "ok",
   "node:🇮🇳 ☑️ Индия/github": "ok",
   "node:🇭🇰 ☑️ Гонконг": "blocked",
-  "node:🇭🇰 ☑️ Гонконг/gemini": "down",
+  "node:🇭🇰 ☑️ Гонконг/gemini": "ok",
   "node:🇭🇰 ☑️ Гонконг/chatgpt": "blocked",
   "node:🇭🇰 ☑️ Гонконг/claude": "blocked",
   "node:🇭🇰 ☑️ Гонконг/youtube": "ok",
@@ -621,15 +621,12 @@
   "proxy:185.13.225.69/gemini": "down"
  },
  "pending": {
-  "node:📺 Youtube/instagram": "ok",
-  "node:🇰🇿 ☑️ Казахстан/gemini": "degraded",
-  "node: 🇫🇷 ☑️ Франция/gemini": "degraded",
-  "node:🇫🇮  ☑️ Финляндия/gemini": "degraded"
+  "node:⚪️ Svoboda-Auto/gemini": "degraded"
  },
  "last_alert": [
   [
    "-1003950923221",
-   821
+   825
   ]
  ],
  "replaced": {
@@ -736,5 +733,5 @@
    "reason": "не отвечал"
   }
  ],
- "updated_at": "2026-10-13T05:59:44.125264+03:00"
+ "updated_at": "2026-10-13T11:00:08.992780+03:00"
 }
