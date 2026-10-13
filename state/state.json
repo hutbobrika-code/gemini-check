@@ -158,7 +158,7 @@
   "node:📺 Youtube/instagram": "ok",
   "node:📺 Youtube/facebook": "ok",
   "node:📺 Youtube/tiktok": "ok",
-  "node:📺 Youtube/x": "down",
+  "node:📺 Youtube/x": "ok",
   "node:📺 Youtube/discord": "ok",
   "node:📺 Youtube/telegram": "down",
   "node:📺 Youtube/netflix": "blocked",
@@ -621,14 +621,15 @@
   "proxy:185.13.225.69/gemini": "down"
  },
  "pending": {
-  "node:📺 Youtube/instagram": "down",
-  "node:📺 Youtube/x": "ok",
-  "node:🇮🇳 ☑️ Индия/gemini": "degraded"
+  "node:⚪️ Svoboda-Auto/gemini": "degraded",
+  "node:⚪️ Svoboda: Экспериментальный 2": "down",
+  "node:🇳🇱 Нидерланды 10Gb/s🔥": "down",
+  "node:📺 Youtube/instagram": "down"
  },
  "last_alert": [
   [
    "-1003950923221",
-   827
+   828
   ]
  ],
  "replaced": {
@@ -735,5 +736,5 @@
    "reason": "не отвечал"
   }
  ],
- "updated_at": "2026-10-13T16:00:49.608996+03:00"
+ "updated_at": "2026-10-13T19:12:30.630219+03:00"
 }
