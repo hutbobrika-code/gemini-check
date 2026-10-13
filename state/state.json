@@ -45,7 +45,7 @@
   "node:⚪️ Svoboda: Экспериментальный/spotify": "ok",
   "node:⚪️ Svoboda: Экспериментальный/twitch": "ok",
   "node:⚪️ Svoboda: Экспериментальный/github": "ok",
-  "node:⚪️ Svoboda: Экспериментальный 2": "down",
+  "node:⚪️ Svoboda: Экспериментальный 2": "degraded",
   "node:⚪️ Svoboda: Экспериментальный 2/gemini": "down",
   "node:⚪️ Svoboda: Экспериментальный 2/chatgpt": "ok",
   "node:⚪️ Svoboda: Экспериментальный 2/claude": "ok",
@@ -90,7 +90,7 @@
   "node:🔵 Svoboda-MAX: Yota, T-моб, Билайн/spotify": "ok",
   "node:🔵 Svoboda-MAX: Yota, T-моб, Билайн/twitch": "ok",
   "node:🔵 Svoboda-MAX: Yota, T-моб, Билайн/github": "ok",
-  "node:🇳🇱 Нидерланды 10Gb/s🔥": "down",
+  "node:🇳🇱 Нидерланды 10Gb/s🔥": "degraded",
   "node:🇳🇱 Нидерланды 10Gb/s🔥/gemini": "down",
   "node:🇳🇱 Нидерланды 10Gb/s🔥/chatgpt": "ok",
   "node:🇳🇱 Нидерланды 10Gb/s🔥/claude": "ok",
@@ -105,7 +105,7 @@
   "node:🇳🇱 Нидерланды 10Gb/s🔥/spotify": "ok",
   "node:🇳🇱 Нидерланды 10Gb/s🔥/twitch": "ok",
   "node:🇳🇱 Нидерланды 10Gb/s🔥/github": "ok",
-  "node:🇳🇱 Нидерланды - 2  10Gb/s🔥": "down",
+  "node:🇳🇱 Нидерланды - 2  10Gb/s🔥": "degraded",
   "node:🇳🇱 Нидерланды - 2  10Gb/s🔥/gemini": "down",
   "node:🇳🇱 Нидерланды - 2  10Gb/s🔥/chatgpt": "ok",
   "node:🇳🇱 Нидерланды - 2  10Gb/s🔥/claude": "ok",
@@ -155,10 +155,10 @@
   "node:📺 Youtube/chatgpt": "blocked",
   "node:📺 Youtube/claude": "blocked",
   "node:📺 Youtube/youtube": "ok",
-  "node:📺 Youtube/instagram": "ok",
+  "node:📺 Youtube/instagram": "down",
   "node:📺 Youtube/facebook": "ok",
   "node:📺 Youtube/tiktok": "ok",
-  "node:📺 Youtube/x": "down",
+  "node:📺 Youtube/x": "ok",
   "node:📺 Youtube/discord": "ok",
   "node:📺 Youtube/telegram": "down",
   "node:📺 Youtube/netflix": "blocked",
@@ -169,7 +169,7 @@
   "node:🇷🇺 ☑️ Россия/gemini": "ok",
   "node:🇷🇺 ☑️ Россия/chatgpt": "blocked",
   "node:🇷🇺 ☑️ Россия/claude": "blocked",
-  "node:🇷🇺 ☑️ Россия/youtube": "ok",
+  "node:🇷🇺 ☑️ Россия/youtube": "down",
   "node:🇷🇺 ☑️ Россия/instagram": "ok",
   "node:🇷🇺 ☑️ Россия/facebook": "ok",
   "node:🇷🇺 ☑️ Россия/tiktok": "ok",
@@ -621,16 +621,15 @@
   "proxy:185.13.225.69/gemini": "down"
  },
  "pending": {
-  "node:🇭🇰 ☑️ Гонконг/gemini": "ok",
-  "node:📺 Youtube/instagram": "down",
-  "node:📺 Youtube/x": "ok",
-  "node:🇫🇮  ☑️ Финляндия": "ok",
-  "node:🇫🇮  ☑️ Финляндия/gemini": "ok"
+  "node:📺 Youtube/instagram": "ok",
+  "node:🇰🇿 ☑️ Казахстан/gemini": "degraded",
+  "node: 🇫🇷 ☑️ Франция/gemini": "degraded",
+  "node:🇫🇮  ☑️ Финляндия/gemini": "degraded"
  },
  "last_alert": [
   [
    "-1003950923221",
-   816
+   821
   ]
  ],
  "replaced": {
@@ -737,5 +736,5 @@
    "reason": "не отвечал"
   }
  ],
- "updated_at": "2026-10-13T00:58:56.723437+03:00"
+ "updated_at": "2026-10-13T05:59:44.125264+03:00"
 }
